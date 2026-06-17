@@ -20,6 +20,71 @@ describe("runCli", () => {
     expect(result.exitCode).toBe(0);
     expect(parsed.verdict).toBe("Launch Blocked");
   });
+
+  it("returns insufficient evidence for unsupported projects with no findings", async () => {
+    const result = await runCli(["inspect", "fixtures/unsupported-empty-node", "--json"]);
+    const parsed = JSON.parse(result.stdout);
+
+    expect(result.exitCode).toBe(0);
+    expect(parsed.verdict).toBe("Insufficient Evidence");
+  });
+
+  it("prints benchmark report with injected dependencies", async () => {
+    const result = await runCli(["benchmark", "benchmarks/github-projects.json"], {
+      resolveRepository: async () => ({ root: "fixtures/next-ai-saas-risky" }),
+      hasSupportedProjectEvidence: async () => true,
+      analyzeFindings: async () => [
+        {
+          ruleId: "DK-AI-001",
+          title: "AI",
+          severity: "blocker",
+          confidence: "high",
+          missingControls: [],
+          consequence: "test",
+          acceptanceCriteria: [],
+          evidence: [],
+        },
+        {
+          ruleId: "DK-DB-001",
+          title: "DB",
+          severity: "high",
+          confidence: "medium",
+          missingControls: [],
+          consequence: "test",
+          acceptanceCriteria: [],
+          evidence: [],
+        },
+        {
+          ruleId: "DK-WEBHOOK-001",
+          title: "Webhook",
+          severity: "blocker",
+          confidence: "high",
+          missingControls: [],
+          consequence: "test",
+          acceptanceCriteria: [],
+          evidence: [],
+        },
+      ],
+    });
+
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout).toContain("# Demo Killer Benchmark");
+    expect(result.stdout).toContain("Archetypes:");
+  });
+
+  it("returns a friendly error when inspect clone fails", async () => {
+    const result = await runCli(["inspect", "https://github.com/AVIDS2/definitely-not-a-real-repo"], {
+      resolveRepository: async () => {
+        throw new Error("raw git error");
+      },
+      analyzeFindings: async () => [],
+      hasSupportedProjectEvidence: async () => false,
+    });
+
+    expect(result.exitCode).toBe(1);
+    expect(result.stderr).toContain("Failed to inspect repository");
+    expect(result.stderr).toContain("raw git error");
+  });
 });
 
 describe("isGitHubUrl", () => {

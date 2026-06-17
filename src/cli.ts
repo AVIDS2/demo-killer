@@ -1,9 +1,15 @@
 import { analyzeFindings } from "./rules/index.js";
+import { buildInventory } from "./inventory.js";
+import { loadBenchmarkManifest } from "./benchmark.js";
+import { runBenchmarkSuite } from "./benchmark-runner.js";
 import { buildJsonReport } from "./report/json.js";
+import { renderBenchmarkMarkdown } from "./report/benchmark-markdown.js";
 import { renderMarkdownReport } from "./report/markdown.js";
 import { resolveRepository } from "./repository.js";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import type { Finding } from "./types.js";
+import type { ResolvedRepository } from "./repository.js";
 
 export interface CliResult {
   exitCode: number;
@@ -11,28 +17,88 @@ export interface CliResult {
   stderr: string;
 }
 
-export async function runCli(argv: string[] = process.argv.slice(2)): Promise<CliResult> {
+export interface CliDependencies {
+  resolveRepository(input: string): Promise<ResolvedRepository>;
+  analyzeFindings(root: string): Promise<Finding[]>;
+  hasSupportedProjectEvidence(root: string): Promise<boolean>;
+}
+
+const defaultDependencies: CliDependencies = {
+  resolveRepository,
+  analyzeFindings,
+  hasSupportedProjectEvidence: async (root) => {
+    const inventory = await buildInventory(root);
+    return inventory.stack === "nextjs" && inventory.apiRoutes.length > 0;
+  },
+};
+
+export async function runCli(
+  argv: string[] = process.argv.slice(2),
+  dependencies: CliDependencies = defaultDependencies,
+): Promise<CliResult> {
   const command = argv[0];
   const input = argv[1] && !argv[1].startsWith("--") ? argv[1] : process.cwd();
   const wantsJson = argv.includes("--json");
 
-  if (command !== "inspect") {
+  if (command === "benchmark") {
+    const manifestPath = input;
+    const samples = await loadBenchmarkManifest(manifestPath);
+    const benchmark = await runBenchmarkSuite(samples, {
+      inspectRepository: async (sample) => {
+        const resolved = await dependencies.resolveRepository(sample.repo);
+        try {
+          const findings = await dependencies.analyzeFindings(resolved.root);
+          const hasSupportedProjectEvidence = await dependencies.hasSupportedProjectEvidence(
+            resolved.root,
+          );
+          return buildJsonReport(findings, new Date().toISOString(), {
+            hasSupportedProjectEvidence,
+          });
+        } finally {
+          await resolved.cleanup?.();
+        }
+      },
+    });
+
     return {
-      exitCode: 1,
-      stdout: "Usage: demokiller inspect [project-root-or-github-url] [--json|--markdown]",
+      exitCode: 0,
+      stdout: renderBenchmarkMarkdown(benchmark),
       stderr: "",
     };
   }
 
-  const resolved = await resolveRepository(input);
-  try {
-    const findings = await analyzeFindings(resolved.root);
-    const report = buildJsonReport(findings);
-    const stdout = wantsJson ? JSON.stringify(report, null, 2) : renderMarkdownReport(report);
+  if (command !== "inspect") {
+    return {
+      exitCode: 1,
+      stdout:
+        "Usage: demokiller inspect [project-root-or-github-url] [--json|--markdown]\n       demokiller benchmark [manifest-path]",
+      stderr: "",
+    };
+  }
 
-    return { exitCode: 0, stdout, stderr: "" };
-  } finally {
-    await resolved.cleanup?.();
+  try {
+    const resolved = await dependencies.resolveRepository(input);
+    try {
+      const findings = await dependencies.analyzeFindings(resolved.root);
+      const hasSupportedProjectEvidence = await dependencies.hasSupportedProjectEvidence(
+        resolved.root,
+      );
+      const report = buildJsonReport(findings, new Date().toISOString(), {
+        hasSupportedProjectEvidence,
+      });
+      const stdout = wantsJson ? JSON.stringify(report, null, 2) : renderMarkdownReport(report);
+
+      return { exitCode: 0, stdout, stderr: "" };
+    } finally {
+      await resolved.cleanup?.();
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return {
+      exitCode: 1,
+      stdout: "",
+      stderr: `Failed to inspect repository: ${message}`,
+    };
   }
 }
 

@@ -1,22 +1,92 @@
 [
   {
     "name": "AI-SAAS",
+    "archetype": "ai-saas",
     "repo": "https://github.com/amanbsrepo/AI-SAAS",
-    "why": "AI-powered SaaS built with Next.js, Prisma, Stripe, Clerk, OpenAI, and Replicate"
+    "why": "AI-powered SaaS built with Next.js, Prisma, Stripe, Clerk, OpenAI, and Replicate",
+    "riskProfile": ["paid-ai", "payments", "database"],
+    "expectedVerdict": "Launch Blocked",
+    "expectedRuleIds": ["DK-AI-001", "DK-WEBHOOK-001", "DK-ENV-001", "DK-DB-001"]
   },
   {
     "name": "SaaS Kit Prisma",
+    "archetype": "ai-saas",
     "repo": "https://github.com/Saas-Starter-Kit/Saas-Kit-prisma",
-    "why": "Next.js + Prisma + OpenAI SaaS template"
+    "why": "Next.js + Prisma + OpenAI SaaS template",
+    "riskProfile": ["paid-ai", "payments", "database"],
+    "expectedVerdict": "Demo",
+    "expectedRuleIds": ["DK-DB-001"]
   },
   {
     "name": "Next.js SaaS Starter",
+    "archetype": "payment-starter",
     "repo": "https://github.com/nextjs/saas-starter",
-    "why": "Official Next.js SaaS starter with auth and Stripe"
+    "why": "Official Next.js SaaS starter with auth and Stripe",
+    "riskProfile": ["payments", "database"],
+    "expectedVerdict": "Launch Blocked",
+    "expectedRuleIds": ["DK-WEBHOOK-001"]
   },
   {
     "name": "Next JS AI SaaS",
+    "archetype": "ai-saas",
     "repo": "https://github.com/spsanchore13/next-js-ai-saas",
-    "why": "AI SaaS demo with OpenAI and Stripe"
+    "why": "AI SaaS demo with OpenAI and Stripe",
+    "riskProfile": ["paid-ai", "payments", "database"],
+    "expectedVerdict": "Launch Blocked",
+    "expectedRuleIds": ["DK-AI-001", "DK-WEBHOOK-001", "DK-DB-001"]
+  },
+  {
+    "name": "Next.js Subscription Payments",
+    "archetype": "payment-starter",
+    "repo": "https://github.com/vercel/nextjs-subscription-payments",
+    "why": "Payment-focused starter with Stripe and Supabase, useful as a non-AI SaaS-adjacent benchmark",
+    "riskProfile": ["payments", "database", "env-contract"],
+    "expectedVerdict": "Launch Blocked",
+    "expectedRuleIds": ["DK-WEBHOOK-001", "DK-ENV-001"]
+  },
+  {
+    "name": "Express API Starter TS",
+    "archetype": "api-backend",
+    "repo": "https://github.com/w3cj/express-api-starter-ts",
+    "why": "TypeScript Express API starter used to track unsupported backend archetype coverage",
+    "riskProfile": ["api", "unsupported-scope"],
+    "expectedVerdict": "Insufficient Evidence",
+    "expectedRuleIds": []
+  },
+  {
+    "name": "TailAdmin Next.js Dashboard",
+    "archetype": "admin-panel",
+    "repo": "https://github.com/TailAdmin/free-nextjs-admin-dashboard",
+    "why": "Admin dashboard archetype without currently supported production-risk rules",
+    "riskProfile": ["admin-ui", "unsupported-scope"],
+    "expectedVerdict": "Insufficient Evidence",
+    "expectedRuleIds": []
+  },
+  {
+    "name": "Discord Bot Starter",
+    "archetype": "automation-worker",
+    "repo": "https://github.com/threeal/discord-bot-starter",
+    "why": "Automation/bot archetype used to prevent unsupported workers from being over-certified",
+    "riskProfile": ["bot", "automation", "unsupported-scope"],
+    "expectedVerdict": "Insufficient Evidence",
+    "expectedRuleIds": []
+  },
+  {
+    "name": "LangChain Next.js Template",
+    "archetype": "agent-app",
+    "repo": "https://github.com/langchain-ai/langchain-nextjs-template",
+    "why": "Agent/RAG-style Next.js template with public AI routes and retrieval endpoints",
+    "riskProfile": ["agent", "rag", "paid-ai", "env-contract"],
+    "expectedVerdict": "Launch Blocked",
+    "expectedRuleIds": ["DK-AI-001", "DK-ENV-001"]
+  },
+  {
+    "name": "Astro Paper",
+    "archetype": "content-site",
+    "repo": "https://github.com/satnaing/astro-paper",
+    "why": "Content-site archetype used to prevent unsupported static sites from being over-certified",
+    "riskProfile": ["content", "unsupported-scope"],
+    "expectedVerdict": "Insufficient Evidence",
+    "expectedRuleIds": []
   }
 ]

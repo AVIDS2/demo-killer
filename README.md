@@ -18,6 +18,22 @@ You can also inspect a public GitHub repository URL:
 node dist/src/cli.js inspect https://github.com/owner/repo --json
 ```
 
+## Benchmark
+
+Demo Killer can run an on-demand public benchmark set:
+
+```powershell
+npm run benchmark
+```
+
+The benchmark is archetype-aware. Samples are labeled by project shape, such as `ai-saas` or `payment-starter`, so Demo Killer does not collapse into a single SaaS-only scanner.
+
+Each sample is reported as:
+
+- `match` when the verdict and rule ids match the stored expectation.
+- `mismatch` when the project analyzes but the outcome differs from the benchmark expectation.
+- `error` when the repository cannot be cloned or inspected.
+
 Example verdict:
 
 ```text

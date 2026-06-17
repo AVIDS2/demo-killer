@@ -33,6 +33,22 @@ describe("reports", () => {
     expect(report.findings[0]?.ruleId).toBe("DK-AI-001");
   });
 
+  it("does not claim production candidate without supported-scope evidence", () => {
+    const report = buildJsonReport([], "2026-06-17T00:00:00.000Z", {
+      hasSupportedProjectEvidence: false,
+    });
+
+    expect(report.verdict).toBe("Insufficient Evidence");
+  });
+
+  it("can mark an empty supported-scope report as production candidate", () => {
+    const report = buildJsonReport([], "2026-06-17T00:00:00.000Z", {
+      hasSupportedProjectEvidence: true,
+    });
+
+    expect(report.verdict).toBe("Production Candidate");
+  });
+
   it("renders production consequence and evidence in markdown", () => {
     const report = buildJsonReport([finding], "2026-06-17T00:00:00.000Z");
     const markdown = renderMarkdownReport(report);

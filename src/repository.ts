@@ -1,4 +1,4 @@
-import { mkdtemp } from "node:fs/promises";
+import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
@@ -43,12 +43,17 @@ export async function resolveRepository(input: string): Promise<ResolvedReposito
 
   const parent = await mkdtemp(path.join(tmpdir(), "demokiller-"));
   const target = path.join(parent, "repo");
-  await runGitClone(input, target);
+  try {
+    await runGitClone(input, target);
+  } catch (error) {
+    await rm(parent, { recursive: true, force: true });
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to clone GitHub repository: ${message}`);
+  }
 
   return {
     root: target,
     cleanup: async () => {
-      const { rm } = await import("node:fs/promises");
       await rm(parent, { recursive: true, force: true });
     },
   };

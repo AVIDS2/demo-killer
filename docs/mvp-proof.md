@@ -48,4 +48,20 @@ Remaining expected findings:
 
 `benchmarks/github-projects.json` lists real public GitHub repositories that can be used for manual proof and future regression benchmarking.
 
+Each public sample includes:
+
+- `archetype` - the project shape, such as `ai-saas` or `payment-starter`.
+- `riskProfile` - the production risk surfaces the sample represents.
+- `expectedVerdict` - the stored benchmark verdict.
+- `expectedRuleIds` - the rules expected to appear for that sample.
+
+This keeps the benchmark tied to the general Demo Killer thesis: the product kills productionization illusions across project archetypes, not only SaaS demos.
+
 These are intentionally not part of the default test suite because public repositories can change, disappear, or fail to clone due to network conditions.
+
+Run the public benchmark on demand:
+
+```powershell
+npm run build
+npm run benchmark
+```

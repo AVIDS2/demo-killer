@@ -1,0 +1,37 @@
+# Demo Killer Progress
+
+## Current Phase
+
+Phase 2: Benchmark & Trust Hardening.
+
+## Completed
+
+- Product direction locked: "Kill demos, turn them into production candidates."
+- First wedge locked: AI-built Next.js SaaS / AI apps before launch.
+- Public GitHub repo created: https://github.com/AVIDS2/demo-killer
+- MVP CLI implemented with local path and public GitHub URL inspection.
+- Fixture-backed tests, source inspection, rule engine, JSON/Markdown reports, and recheck diff implemented.
+- Real GitHub smoke tests succeeded against public AI SaaS repositories.
+- Phase 2 plan written: `docs/superpowers/plans/2026-06-17-demo-killer-benchmark-trust-hardening-plan.md`.
+- Archetype-aware benchmark manifest implemented.
+- Benchmark runner, Markdown summary, CLI command, and npm script implemented.
+- GitHub clone failures now produce user-facing errors and clean up temporary directories.
+- Supported-scope guard added so unsupported projects return `Insufficient Evidence` instead of `Production Candidate`.
+- Benchmark manifest expanded to `api-backend`, `admin-panel`, and `automation-worker`.
+- Benchmark manifest expanded to `agent-app` and `content-site`.
+
+## In Progress
+
+- Calibrate more supported-scope archetypes and better hardening phases.
+
+## Next Steps
+
+1. Commit and push the benchmark trust hardening changes.
+2. Add user-facing hardening phases to reports.
+3. Start implementing first non-SaaS supported rules, likely `agent-app` or `api-backend`.
+
+## Known Risks
+
+- Public repositories can change, disappear, or fail to clone; they must not be part of the default unit test suite.
+- Current rules are intentionally narrow and focused on Next.js App Router TypeScript projects.
+- Demo Killer must not claim "Production Ready"; it can only say "Production Candidate" within supported scope.
