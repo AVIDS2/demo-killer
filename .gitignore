@@ -1,10 +1,46 @@
+# Dependencies
 node_modules/
+
+# Build outputs
 dist/
+build/
+out/
 .next/
 .turbo/
+.vercel/
+
+# Test and coverage outputs
+coverage/
+.vitest/
+test-results/
+playwright-report/
+
+# Local environment files
 .env
 .env.*
 !.env.example
+!.env.*.example
+
+# Demo Killer runtime state
+.demokiller/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Package manager caches
+.npm/
+.pnpm-store/
+
+# TypeScript
+*.tsbuildinfo
+
+# Editor and OS files
+.vscode/
+.idea/
 .DS_Store
 Thumbs.db
-.demokiller/
+desktop.ini
