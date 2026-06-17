@@ -173,12 +173,13 @@ The first version should not attempt to deeply solve:
 
 ### Phase 1: Trustworthy Local CLI
 
-Build a local CLI that can inspect real or fixture Next.js projects and output JSON plus Markdown reports.
+Build a local CLI that can inspect local Next.js projects, fixture projects, and public GitHub repositories cloned into a temporary workspace. Output JSON plus Markdown reports.
 
 Commands:
 
 ```powershell
 demokiller inspect
+demokiller inspect https://github.com/<owner>/<repo>
 demokiller inspect --json
 demokiller inspect --markdown
 demokiller recheck
@@ -222,7 +223,12 @@ CI should initially warn or comment rather than block by default.
 
 The MVP must be sample-driven.
 
-Before building general scanning, create a fixture corpus of AI-style Next.js demos. Each sample must have expected findings.
+Before building broad scanning, use two layers of samples:
+
+1. Stable local fixtures for deterministic automated tests.
+2. A small public benchmark manifest of real AI/vibe-built GitHub projects for product proof.
+
+Local tests should not depend on network access or mutable external repositories. Public GitHub samples are used for demos, README proof, regression checks run on demand, and future benchmark reporting.
 
 Required samples:
 

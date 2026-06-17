@@ -1,0 +1,22 @@
+[
+  {
+    "name": "AI-SAAS",
+    "repo": "https://github.com/amanbsrepo/AI-SAAS",
+    "why": "AI-powered SaaS built with Next.js, Prisma, Stripe, Clerk, OpenAI, and Replicate"
+  },
+  {
+    "name": "SaaS Kit Prisma",
+    "repo": "https://github.com/Saas-Starter-Kit/Saas-Kit-prisma",
+    "why": "Next.js + Prisma + OpenAI SaaS template"
+  },
+  {
+    "name": "Next.js SaaS Starter",
+    "repo": "https://github.com/nextjs/saas-starter",
+    "why": "Official Next.js SaaS starter with auth and Stripe"
+  },
+  {
+    "name": "Next JS AI SaaS",
+    "repo": "https://github.com/spsanchore13/next-js-ai-saas",
+    "why": "AI SaaS demo with OpenAI and Stripe"
+  }
+]

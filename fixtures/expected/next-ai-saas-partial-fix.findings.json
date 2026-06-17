@@ -1,0 +1,9 @@
+[
+  {
+    "ruleId": "DK-WEBHOOK-001",
+    "severity": "blocker",
+    "entryPoint": "app/api/stripe/webhook/route.ts",
+    "missingControls": ["signatureVerification", "idempotency"],
+    "asset": "payment state"
+  }
+]

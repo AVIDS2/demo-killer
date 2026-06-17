@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a trustworthy local CLI that diagnoses why AI-style Next.js SaaS/AI apps are still demos by producing evidence-backed launch blockers, production consequences, and a recheckable hardening path.
+**Goal:** Build a trustworthy CLI that diagnoses why AI-style Next.js SaaS/AI apps are still demos by producing evidence-backed launch blockers, production consequences, and a recheckable hardening path from either a local path or a public GitHub repository URL.
 
-**Architecture:** Use a sample-driven TypeScript implementation. Start with fixture Next.js projects and golden expected findings, then build an evidence schema, static inventory extractor, TypeScript source inspector, evidence-first rule engine, JSON/Markdown report generator, and `.demokiller` recheck snapshots. MCP, skills, plugins, dashboards, and CI are explicitly out of scope for this MVP plan.
+**Architecture:** Use a sample-driven TypeScript implementation. Keep deterministic local fixtures for tests, add a public benchmark manifest for real GitHub demo projects, then build an evidence schema, static inventory extractor, TypeScript source inspector, evidence-first rule engine, JSON/Markdown report generator, GitHub URL input support, and `.demokiller` recheck snapshots. MCP, skills, plugins, dashboards, and CI are explicitly out of scope for this MVP plan.
 
 **Tech Stack:** TypeScript, Node.js, Vitest, TypeScript compiler API or `ts-morph`, JSON and Markdown report output.
 
@@ -19,6 +19,7 @@ The supported target is:
 - Next.js App Router.
 - TypeScript.
 - Local static inspection.
+- Public GitHub repository input cloned into a temporary workspace.
 - AI/SaaS-style projects with API routes, environment variables, provider SDK calls, database/migration files, and basic deployment metadata.
 
 The MVP must not output `Production Ready`. It may output:
@@ -45,6 +46,7 @@ The MVP must not output `Production Ready`. It may output:
 - `src/rules/observability.ts` - Critical path logging/diagnosis rule.
 - `src/report/json.ts` - Stable JSON report builder.
 - `src/report/markdown.ts` - Human report renderer.
+- `src/repository.ts` - Local path and GitHub URL resolution.
 - `src/state.ts` - `.demokiller` snapshot and recheck diff logic.
 - `src/cli.ts` - CLI command parsing and orchestration.
 - `src/index.ts` - Public exports.
@@ -52,6 +54,7 @@ The MVP must not output `Production Ready`. It may output:
 - `fixtures/next-ai-saas-partial-fix/` - Same sample after selected fixes.
 - `fixtures/expected/next-ai-saas-risky.findings.json` - Golden findings.
 - `fixtures/expected/next-ai-saas-partial-fix.findings.json` - Golden findings after fixes.
+- `benchmarks/github-projects.json` - Public real-project benchmark manifest for manual/on-demand proof.
 - `tests/fixtures.test.ts` - Fixture integrity tests.
 - `tests/inventory.test.ts` - Inventory extraction tests.
 - `tests/source-inspector.test.ts` - Source analysis tests.
