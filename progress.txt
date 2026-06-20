@@ -26,6 +26,7 @@ Phase 2: Benchmark & Trust Hardening.
 - `demokiller init` implemented as the first agent-native integration surface. It writes `.demokiller/AGENT.md` and a managed `AGENTS.md` production gate block.
 - README rewritten as a Chinese-first product and user guide, with `README.en.md` for English users.
 - README top section polished with a rendered banner, npm/download/license/CI/stars badges, centered navigation, and agent-facing product callout.
+- README now includes a styled product snapshot table for package/runtime/modes/scope, closer to a polished open-source homepage.
 
 ## In Progress
 

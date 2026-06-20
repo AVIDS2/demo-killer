@@ -12,6 +12,7 @@ describe("product documentation", () => {
   it("uses Chinese as the primary README and links to English documentation", async () => {
     const readme = await readDoc("README.md");
 
+    expect(readme).toContain("产品快照");
     expect(readme).toContain("assets/demokiller-banner.svg");
     expect(readme).toContain("img.shields.io/npm/v/demokiller");
     expect(readme).toContain("img.shields.io/github/actions/workflow/status/AVIDS2/demokiller/ci.yml");
@@ -26,6 +27,7 @@ describe("product documentation", () => {
   it("ships an English README for global users", async () => {
     const readme = await readDoc("README.en.md");
 
+    expect(readme).toContain("Product Snapshot");
     expect(readme).toContain("assets/demokiller-banner.svg");
     expect(readme).toContain("img.shields.io/npm/v/demokiller");
     expect(readme).toContain("img.shields.io/github/actions/workflow/status/AVIDS2/demokiller/ci.yml");

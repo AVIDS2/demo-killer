@@ -60,6 +60,21 @@ It is not a generic scanner or a fake "production ready" certificate. Think of i
 - Produces a phased hardening plan.
 - Gives AI coding agents a concrete production gate.
 
+## Product Snapshot
+
+<table>
+  <tr>
+    <td><strong>Package</strong><br><code>demokiller</code></td>
+    <td><strong>Runtime</strong><br>Node 18+</td>
+    <td><strong>Modes</strong><br><code>inspect</code> · <code>init</code> · <code>benchmark</code></td>
+  </tr>
+  <tr>
+    <td><strong>Output</strong><br>Markdown · JSON</td>
+    <td><strong>Supported scope</strong><br>Next.js App Router · TypeScript</td>
+    <td><strong>Gate</strong><br><code>Launch Blocked</code></td>
+  </tr>
+</table>
+
 ## Why It Exists
 
 AI coding tools make working demos easy. A page loads, an API responds, a payment webhook runs, an AI route returns content, and the database writes data.
