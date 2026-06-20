@@ -43,6 +43,7 @@ describe("npm package contract", () => {
       expect.arrayContaining([
         "dist/src",
         "README.md",
+        "README.en.md",
         "benchmarks/github-projects.json",
         "LICENSE",
       ]),

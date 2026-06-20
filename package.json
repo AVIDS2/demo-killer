@@ -49,6 +49,7 @@
   "files": [
     "dist/src",
     "README.md",
+    "README.en.md",
     "benchmarks/github-projects.json",
     "LICENSE"
   ]

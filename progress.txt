@@ -24,6 +24,7 @@ Phase 2: Benchmark & Trust Hardening.
 - NPM publish hardening added: package contract test, CLI shebang, prepack build, Node engine, LICENSE, clean tarball contents, and tarball install smoke test.
 - Dev dependency audit cleaned by moving to Vitest 3.2.6 / Vite 6.4.3 while keeping Node 18+ support.
 - `demokiller init` implemented as the first agent-native integration surface. It writes `.demokiller/AGENT.md` and a managed `AGENTS.md` production gate block.
+- README rewritten as a Chinese-first product and user guide, with `README.en.md` for English users.
 
 ## In Progress
 
