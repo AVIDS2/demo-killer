@@ -4,6 +4,8 @@ The MVP is validated against fixture apps that look like AI-generated SaaS demos
 
 The fixture layer exists so tests are deterministic and do not depend on mutable external GitHub repositories. The benchmark manifest exists so Demo Killer can also be demonstrated against real public projects.
 
+The product thesis remains: kill your demo and turn it into a truly production-deliverable system. Reports must therefore include both diagnosis and a hardening path.
+
 ## Risky Fixture
 
 `fixtures/next-ai-saas-risky` contains:
@@ -25,6 +27,12 @@ Expected findings:
 - `DK-OBS-001`
 - `DK-ENV-001`
 - `DK-DB-001`
+
+The report also produces a hardening plan:
+
+- Phase 0: stop launch by fixing blocker findings.
+- Phase 1: establish a production baseline for high-severity gaps.
+- Phase 2: build operational confidence after the launch blockers and baseline are closed.
 
 ## Partial Fix Fixture
 

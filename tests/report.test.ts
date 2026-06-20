@@ -31,6 +31,12 @@ describe("reports", () => {
 
     expect(report.verdict).toBe("Launch Blocked");
     expect(report.findings[0]?.ruleId).toBe("DK-AI-001");
+    expect(report.hardeningPlan.phases[0]).toMatchObject({
+      id: "phase-0",
+      title: "Stop Launch",
+      findingRuleIds: ["DK-AI-001"],
+    });
+    expect(report.hardeningPlan.recheckCommand).toBe("demokiller inspect . --markdown");
   });
 
   it("does not claim production candidate without supported-scope evidence", () => {
@@ -56,5 +62,11 @@ describe("reports", () => {
     expect(markdown).toContain("Verdict: Launch Blocked");
     expect(markdown).toContain("A public script can repeatedly trigger paid AI calls.");
     expect(markdown).toContain("app/api/chat/route.ts:5");
+    expect(markdown).toContain("## Hardening Plan");
+    expect(markdown).toContain("### Phase 0: Stop Launch");
+    expect(markdown).toContain("1. DK-AI-001");
+    expect(markdown).toContain("### Phase 1: Production Baseline");
+    expect(markdown).toContain("### Phase 2: Operational Confidence");
+    expect(markdown).toContain("demokiller inspect . --markdown");
   });
 });

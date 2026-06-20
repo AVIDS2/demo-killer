@@ -4,6 +4,8 @@ Demo Killer is the pre-launch production engineer for AI-built apps.
 
 It tells you why your working Next.js SaaS or AI app is still a demo, what can happen in production, and what must change before real users touch it.
 
+Core theme: kill your demo and turn it into a truly production-deliverable system.
+
 ## Usage
 
 ```powershell
@@ -42,6 +44,21 @@ Verdict: Launch Blocked
 DK-AI-001: Paid AI capability is exposed without production abuse controls
 Entry point: app/api/chat/route.ts
 Production consequence: A public script can repeatedly trigger paid AI calls and create unexpected API costs.
+```
+
+Example hardening plan:
+
+```text
+Phase 0: Stop Launch
+1. DK-AI-001
+2. DK-WEBHOOK-001
+
+Phase 1: Production Baseline
+1. DK-ENV-001
+2. DK-DB-001
+
+Recheck command:
+demokiller inspect . --markdown
 ```
 
 ## MVP Scope

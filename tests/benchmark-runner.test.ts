@@ -7,6 +7,11 @@ function report(ruleIds: string[], verdict: AnalysisReport["verdict"] = "Launch 
     verdict,
     supportedScope: [],
     generatedAt: "2026-06-17T00:00:00.000Z",
+    hardeningPlan: {
+      summary: "test",
+      phases: [],
+      recheckCommand: "demokiller inspect . --markdown",
+    },
     findings: ruleIds.map((ruleId) => ({
       ruleId,
       title: ruleId,

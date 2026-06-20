@@ -19,6 +19,7 @@ Phase 2: Benchmark & Trust Hardening.
 - Supported-scope guard added so unsupported projects return `Insufficient Evidence` instead of `Production Candidate`.
 - Benchmark manifest expanded to `api-backend`, `admin-panel`, and `automation-worker`.
 - Benchmark manifest expanded to `agent-app` and `content-site`.
+- Report output now includes a phased hardening plan and recheck command.
 
 ## In Progress
 
@@ -27,7 +28,7 @@ Phase 2: Benchmark & Trust Hardening.
 ## Next Steps
 
 1. Commit and push the benchmark trust hardening changes.
-2. Add user-facing hardening phases to reports.
+2. Improve hardening plan items from rule ids into concrete fix tasks.
 3. Start implementing first non-SaaS supported rules, likely `agent-app` or `api-backend`.
 
 ## Known Risks

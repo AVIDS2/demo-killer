@@ -39,9 +39,23 @@ export interface Finding {
   acceptanceCriteria: string[];
 }
 
+export interface HardeningPhase {
+  id: "phase-0" | "phase-1" | "phase-2";
+  title: string;
+  intent: string;
+  findingRuleIds: string[];
+}
+
+export interface HardeningPlan {
+  summary: string;
+  phases: HardeningPhase[];
+  recheckCommand: string;
+}
+
 export interface AnalysisReport {
   verdict: Verdict;
   supportedScope: string[];
   findings: Finding[];
+  hardeningPlan: HardeningPlan;
   generatedAt: string;
 }
