@@ -4,7 +4,7 @@
   "private": false,
   "type": "module",
   "bin": {
-    "demokiller": "./dist/src/cli.js"
+    "demokiller": "dist/src/cli.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

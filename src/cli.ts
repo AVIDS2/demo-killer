@@ -34,6 +34,12 @@ const defaultDependencies: CliDependencies = {
   },
 };
 
+const usage = [
+  "Usage: demokiller init [project-root]",
+  "       demokiller inspect [project-root-or-github-url] [--json|--markdown]",
+  "       demokiller benchmark [manifest-path]",
+].join("\n");
+
 export async function runCli(
   argv: string[] = process.argv.slice(2),
   dependencies: CliDependencies = defaultDependencies,
@@ -41,6 +47,14 @@ export async function runCli(
   const command = argv[0];
   const input = argv[1] && !argv[1].startsWith("--") ? argv[1] : process.cwd();
   const wantsJson = argv.includes("--json");
+
+  if (!command || command === "--help" || command === "-h") {
+    return {
+      exitCode: 0,
+      stdout: usage,
+      stderr: "",
+    };
+  }
 
   if (command === "init") {
     try {
@@ -91,8 +105,7 @@ export async function runCli(
   if (command !== "inspect") {
     return {
       exitCode: 1,
-      stdout:
-        "Usage: demokiller init [project-root]\n       demokiller inspect [project-root-or-github-url] [--json|--markdown]\n       demokiller benchmark [manifest-path]",
+      stdout: usage,
       stderr: "",
     };
   }

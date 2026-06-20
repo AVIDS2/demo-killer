@@ -7,6 +7,15 @@ import { isGitHubUrl } from "../src/repository.js";
 import { isDirectCliInvocation, runCli } from "../src/cli.js";
 
 describe("runCli", () => {
+  it("prints help with a successful exit code", async () => {
+    const result = await runCli(["--help"]);
+
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout).toContain("Usage: demokiller init [project-root]");
+    expect(result.stdout).toContain("demokiller inspect");
+    expect(result.stdout).toContain("demokiller benchmark");
+  });
+
   it("prints markdown report for inspect", async () => {
     const result = await runCli(["inspect", "fixtures/next-ai-saas-risky", "--markdown"]);
 
