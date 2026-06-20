@@ -23,17 +23,17 @@ Phase 2: Benchmark & Trust Hardening.
 - NPM package name unified as `demokiller`.
 - NPM publish hardening added: package contract test, CLI shebang, prepack build, Node engine, LICENSE, clean tarball contents, and tarball install smoke test.
 - Dev dependency audit cleaned by moving to Vitest 3.2.6 / Vite 6.4.3 while keeping Node 18+ support.
+- `demokiller init` implemented as the first agent-native integration surface. It writes `.demokiller/AGENT.md` and a managed `AGENTS.md` production gate block.
 
 ## In Progress
 
-- Prepare the first public npm release and then add agent-native integration surfaces.
+- Prepare the first public npm release and then add MCP as the next agent-native surface.
 
 ## Next Steps
 
 1. Publish `demokiller@0.1.0` to npm after final confirmation.
-2. Implement `demokiller init` to drop AGENTS/CLAUDE/Codex guidance into target repos.
-3. Add the first MCP surface so agents can call Demo Killer as a production gate.
-4. Improve hardening plan items from rule ids into concrete fix tasks.
+2. Add the first MCP surface so agents can call Demo Killer as a production gate.
+3. Improve hardening plan items from rule ids into concrete fix tasks.
 
 ## Known Risks
 

@@ -22,6 +22,14 @@ npm install -g demokiller
 demokiller inspect .
 ```
 
+Initialize agent-native production guidance in a project:
+
+```powershell
+demokiller init .
+```
+
+This writes `.demokiller/AGENT.md` and a managed block in `AGENTS.md` so coding agents know Demo Killer is the pre-launch production gate. Existing `AGENTS.md` content is preserved.
+
 You can also inspect a public GitHub repository URL:
 
 ```powershell

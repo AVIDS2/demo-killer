@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { isGitHubUrl } from "../src/repository.js";
@@ -84,6 +86,23 @@ describe("runCli", () => {
     expect(result.exitCode).toBe(1);
     expect(result.stderr).toContain("Failed to inspect repository");
     expect(result.stderr).toContain("raw git error");
+  });
+
+  it("initializes agent guidance for a target project", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "demokiller-cli-init-"));
+    try {
+      const result = await runCli(["init", root]);
+
+      await expect(fs.readFile(path.join(root, ".demokiller", "AGENT.md"), "utf8")).resolves.toContain(
+        "Kill your demo",
+      );
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout).toContain("Initialized Demo Killer");
+      expect(result.stdout).toContain(".demokiller/AGENT.md");
+      expect(result.stdout).toContain("AGENTS.md");
+    } finally {
+      await fs.rm(root, { recursive: true, force: true });
+    }
   });
 });
 

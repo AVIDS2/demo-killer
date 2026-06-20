@@ -1,5 +1,6 @@
 export { runCli } from "./cli.js";
 export { loadBenchmarkManifest } from "./benchmark.js";
+export { initializeProject } from "./init.js";
 export { runBenchmarkSuite } from "./benchmark-runner.js";
 export { buildInventory } from "./inventory.js";
 export { renderBenchmarkMarkdown } from "./report/benchmark-markdown.js";
@@ -11,4 +12,5 @@ export { inspectRouteSource } from "./source-inspector.js";
 export { diffSnapshots } from "./state.js";
 export type { BenchmarkSample, BenchmarkArchetype } from "./benchmark.js";
 export type { BenchmarkResult, BenchmarkSuiteResult } from "./benchmark-runner.js";
+export type { InitFileResult, InitFileStatus, InitResult } from "./init.js";
 export type { AnalysisReport, Evidence, Finding, Verdict } from "./types.js";

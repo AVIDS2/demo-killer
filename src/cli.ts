@@ -2,6 +2,7 @@
 import { analyzeFindings } from "./rules/index.js";
 import { buildInventory } from "./inventory.js";
 import { loadBenchmarkManifest } from "./benchmark.js";
+import { initializeProject } from "./init.js";
 import { runBenchmarkSuite } from "./benchmark-runner.js";
 import { buildJsonReport } from "./report/json.js";
 import { renderBenchmarkMarkdown } from "./report/benchmark-markdown.js";
@@ -41,6 +42,25 @@ export async function runCli(
   const input = argv[1] && !argv[1].startsWith("--") ? argv[1] : process.cwd();
   const wantsJson = argv.includes("--json");
 
+  if (command === "init") {
+    try {
+      const result = await initializeProject(input);
+      const files = result.files.map((file) => `- ${file.path}: ${file.status}`).join("\n");
+      return {
+        exitCode: 0,
+        stdout: `Initialized Demo Killer in ${result.root}\n\n${files}`,
+        stderr: "",
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      return {
+        exitCode: 1,
+        stdout: "",
+        stderr: `Failed to initialize Demo Killer: ${message}`,
+      };
+    }
+  }
+
   if (command === "benchmark") {
     const manifestPath = input;
     const samples = await loadBenchmarkManifest(manifestPath);
@@ -72,7 +92,7 @@ export async function runCli(
     return {
       exitCode: 1,
       stdout:
-        "Usage: demokiller inspect [project-root-or-github-url] [--json|--markdown]\n       demokiller benchmark [manifest-path]",
+        "Usage: demokiller init [project-root]\n       demokiller inspect [project-root-or-github-url] [--json|--markdown]\n       demokiller benchmark [manifest-path]",
       stderr: "",
     };
   }
