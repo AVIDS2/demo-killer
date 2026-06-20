@@ -17,7 +17,7 @@ describe("resolveRepository", () => {
   });
 
   it("cleans up temporary directories after successful clones", async () => {
-    const resolved = await resolveRepository("https://github.com/AVIDS2/demo-killer");
+    const resolved = await resolveRepository("https://github.com/AVIDS2/demokiller");
     const root = resolved.root;
 
     expect(existsSync(root)).toBe(true);

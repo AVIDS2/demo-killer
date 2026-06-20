@@ -14,6 +14,14 @@ npm run build
 node dist/src/cli.js inspect fixtures/next-ai-saas-risky --markdown
 ```
 
+When published, the intended package and command are both `demokiller`:
+
+```powershell
+npx demokiller inspect .
+npm install -g demokiller
+demokiller inspect .
+```
+
 You can also inspect a public GitHub repository URL:
 
 ```powershell

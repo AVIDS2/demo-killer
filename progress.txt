@@ -8,7 +8,7 @@ Phase 2: Benchmark & Trust Hardening.
 
 - Product direction locked: "Kill demos, turn them into production candidates."
 - First wedge locked: AI-built Next.js SaaS / AI apps before launch.
-- Public GitHub repo created: https://github.com/AVIDS2/demo-killer
+- Public GitHub repo created: https://github.com/AVIDS2/demokiller
 - MVP CLI implemented with local path and public GitHub URL inspection.
 - Fixture-backed tests, source inspection, rule engine, JSON/Markdown reports, and recheck diff implemented.
 - Real GitHub smoke tests succeeded against public AI SaaS repositories.

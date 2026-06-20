@@ -89,7 +89,7 @@ describe("runCli", () => {
 
 describe("isGitHubUrl", () => {
   it("detects public github repository urls", () => {
-    expect(isGitHubUrl("https://github.com/AVIDS2/demo-killer")).toBe(true);
+    expect(isGitHubUrl("https://github.com/AVIDS2/demokiller")).toBe(true);
     expect(isGitHubUrl("fixtures/next-ai-saas-risky")).toBe(false);
   });
 });
