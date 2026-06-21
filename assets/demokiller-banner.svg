@@ -1,37 +1,71 @@
 <svg width="1200" height="300" viewBox="0 0 1200 300" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
   <title id="title">Demo Killer</title>
-  <desc id="desc">Demo Killer 的中文封面横幅。</desc>
+  <desc id="desc">Demo Killer hero banner in lava orange and midnight black.</desc>
   <defs>
-    <linearGradient id="panel" x1="0" y1="0" x2="1200" y2="300" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#080A0F"/>
-      <stop offset="1" stop-color="#0B1020"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="300" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#121212"/>
+      <stop offset="0.62" stop-color="#171411"/>
+      <stop offset="1" stop-color="#0B0B0B"/>
     </linearGradient>
+    <radialGradient id="heat" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(958 86) rotate(138) scale(328 208)">
+      <stop stop-color="#FF4500" stop-opacity="0.34"/>
+      <stop offset="0.46" stop-color="#FF4500" stop-opacity="0.11"/>
+      <stop offset="1" stop-color="#FF4500" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="12" stdDeviation="18" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
   </defs>
 
-  <rect width="1200" height="300" rx="28" fill="url(#panel)"/>
-  <rect x="40" y="28" width="1120" height="244" rx="22" fill="#090D14" stroke="#20283A" stroke-width="1.5"/>
+  <rect width="1200" height="300" rx="18" fill="url(#bg)"/>
+  <rect width="1200" height="300" rx="18" fill="url(#heat)"/>
+  <rect x="0" y="0" width="1200" height="300" rx="18" stroke="#2A211D"/>
 
-  <rect x="40" y="28" width="1120" height="2" fill="#22D3EE" opacity="0.75"/>
-  <rect x="40" y="30" width="1120" height="1" fill="#EF4444" opacity="0.55"/>
-
-  <text x="78" y="74" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="4" fill="#94A3B8">开源仓库</text>
-  <text x="1122" y="74" text-anchor="end" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="4" fill="#94A3B8">NPM 包</text>
-
-  <line x1="74" y1="96" x2="1126" y2="96" stroke="#1F2937" stroke-width="1"/>
-
-  <text x="600" y="146" text-anchor="middle" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="72" font-weight="900" letter-spacing="3.5" fill="#F8FAFC">DEMO KILLER</text>
-  <text x="600" y="176" text-anchor="middle" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="6" fill="#67E8F9">面向 AI 生成项目的生产闸门</text>
-
-  <g transform="translate(418 198)">
-    <rect width="364" height="30" rx="15" fill="#0F172A" stroke="#263146"/>
-    <circle cx="20" cy="15" r="4.5" fill="#EF4444"/>
-    <text x="35" y="20" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" fill="#E5E7EB">阻断中 · 还不能给真实用户用</text>
+  <g opacity="0.22">
+    <path d="M52 246H493" stroke="#FF4500" stroke-width="2"/>
+    <path d="M52 248H644" stroke="#F7F0E8" stroke-width="1"/>
+    <path d="M52 62H378" stroke="#FF4500" stroke-width="1"/>
   </g>
 
-  <g opacity="0.38">
-    <line x1="92" y1="238" x2="1108" y2="238" stroke="#1F2937" stroke-width="1"/>
-    <line x1="92" y1="220" x2="1108" y2="220" stroke="#1F2937" stroke-width="1"/>
+  <g transform="translate(68 78)">
+    <text x="0" y="66" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="72" font-weight="300" letter-spacing="-1.2" fill="#F7F0E8">demokiller</text>
+    <text x="2" y="107" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="25" font-weight="500" letter-spacing="0" fill="#B9AEA7">AI 生成项目的生产就绪闸门</text>
+    <rect x="2" y="133" width="640" height="3" rx="1.5" fill="#FF4500"/>
+    <text x="3" y="170" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="3.2" fill="#FF6A2A">CLI · MCP · AGENT SKILLS · PLUGIN</text>
   </g>
 
-  <text x="600" y="252" text-anchor="middle" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" letter-spacing="5" fill="#94A3B8">证据驱动阻断 · 分阶段加固 · 可复查闭环</text>
+  <g transform="translate(716 24)" filter="url(#softShadow)">
+    <rect x="196" y="18" width="116" height="116" rx="58" fill="#FF4500" opacity="0.92"/>
+    <rect x="210" y="32" width="88" height="88" rx="44" fill="#121212"/>
+    <path d="M232 74H276" stroke="#FF4500" stroke-width="7" stroke-linecap="round"/>
+    <path d="M254 52V96" stroke="#FF4500" stroke-width="7" stroke-linecap="round"/>
+
+    <g stroke-linecap="round">
+      <path d="M42 220L182 154L254 76L390 48" stroke="#F7F0E8" stroke-opacity="0.26"/>
+      <path d="M116 44L254 76L352 184L470 128" stroke="#F7F0E8" stroke-opacity="0.18"/>
+      <path d="M182 154L352 184L390 48" stroke="#FF4500" stroke-opacity="0.42"/>
+      <path d="M116 44L182 154L42 220" stroke="#FF4500" stroke-opacity="0.28"/>
+      <path d="M254 76L470 128" stroke="#FF4500" stroke-opacity="0.34"/>
+      <path d="M352 184L470 128L520 236" stroke="#F7F0E8" stroke-opacity="0.16"/>
+    </g>
+
+    <g fill="#F7F0E8">
+      <circle cx="42" cy="220" r="6" opacity="0.55"/>
+      <circle cx="116" cy="44" r="5" opacity="0.42"/>
+      <circle cx="470" cy="128" r="5" opacity="0.45"/>
+      <circle cx="520" cy="236" r="4" opacity="0.36"/>
+    </g>
+    <g fill="#FF6A2A">
+      <circle cx="182" cy="154" r="8"/>
+      <circle cx="254" cy="76" r="7"/>
+      <circle cx="352" cy="184" r="8"/>
+      <circle cx="390" cy="48" r="7"/>
+    </g>
+  </g>
+
+  <g opacity="0.18">
+    <path d="M813 0L739 300" stroke="#F7F0E8"/>
+    <path d="M976 0L1056 300" stroke="#F7F0E8"/>
+    <path d="M693 118H1200" stroke="#F7F0E8"/>
+  </g>
 </svg>

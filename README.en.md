@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  A pre-launch production gate for AI-built apps: evidence-backed launch blockers, real production consequences, and a recheckable hardening plan.
+  An open-source production-readiness gate for AI-built software. The current release connects to coding agents through the npm CLI and agent guidance, with MCP, Agent Skills, plugins, and CI on the roadmap.
 </p>
 
 <p align="center">
@@ -21,7 +21,7 @@
   ·
   <a href="#quick-start">Quick Start</a>
   ·
-  <a href="#agent-workflow">Agent Workflow</a>
+  <a href="#for-agents">For Agents</a>
   ·
   <a href="#roadmap">Roadmap</a>
 </p>
@@ -35,24 +35,24 @@
 </p>
 
 <p align="center">
-  <strong>Evidence-backed blockers</strong>
+  <strong>CLI</strong>
   ·
-  <strong>Production consequences</strong>
+  <strong>MCP</strong>
   ·
-  <strong>Agent guidance</strong>
+  <strong>Agent Skills</strong>
   ·
-  <strong>Hardening plan</strong>
+  <strong>Plugin</strong>
   ·
-  <strong>Recheck loop</strong>
+  <strong>Production Gate</strong>
 </p>
 
 ---
 
 > Using Codex, Claude Code, Cursor, Gemini CLI, or another AI coding agent? Run `npx demokiller init .` first. Demo Killer will write an agent-facing production gate so `Launch Blocked` does not get buried under cosmetic fixes.
 
-Demo Killer is a pre-launch production gate for AI-built apps. It tells you why a working project is still a demo, what can go wrong in production, and what must change before real users touch it.
+Demo Killer is an open-source production-readiness gate for AI-built software. It helps coding agents such as Codex, Claude Code, Cursor, and Gemini CLI check real launch blockers before handoff instead of treating a working demo as a production system.
 
-It is not a generic scanner or a fake "production ready" certificate. Think of it as a local production engineer before launch:
+The current release is centered on the npm CLI and agent guidance. The roadmap expands the same gate into an MCP server, Agent Skills, Claude/Codex/Cursor plugins, and CI gates. Demo Killer is not a generic scanner or a fake "production ready" certificate. Think of it as a local production engineer before launch:
 
 - Finds launch blockers instead of giving a vague score.
 - Explains findings with file evidence.
@@ -66,14 +66,27 @@ It is not a generic scanner or a fake "production ready" certificate. Think of i
   <tr>
     <td><strong>Package</strong><br><code>demokiller</code></td>
     <td><strong>Runtime</strong><br>Node 18+</td>
-    <td><strong>Modes</strong><br><code>inspect</code> · <code>init</code> · <code>benchmark</code></td>
+    <td><strong>Current entry points</strong><br>npm CLI · Agent guidance</td>
   </tr>
   <tr>
     <td><strong>Output</strong><br>Markdown · JSON</td>
     <td><strong>Supported scope</strong><br>Next.js App Router · TypeScript</td>
     <td><strong>Gate</strong><br><code>Launch Blocked</code></td>
   </tr>
+  <tr>
+    <td><strong>Current commands</strong><br><code>inspect</code> · <code>init</code> · <code>benchmark</code></td>
+    <td><strong>Planned entry points</strong><br>MCP · Agent Skills · Plugin · CI</td>
+    <td><strong>Use cases</strong><br>Pre-launch · Handoff · Agent hardening loop</td>
+  </tr>
 </table>
+
+## What You Can Do With It
+
+- Check a local project or public GitHub repository before handoff, release, or deployment.
+- Find launch blockers instead of getting a generic checklist.
+- See file evidence, production consequences, and acceptance criteria for each finding.
+- Output Markdown for humans and JSON for agents, scripts, or CI.
+- Use `demokiller init` to wire the gate into Codex, Claude Code, Cursor, Gemini CLI, and similar agent workflows.
 
 ## Why It Exists
 
@@ -152,9 +165,16 @@ npm install -g demokiller
 demokiller inspect . --markdown
 ```
 
-## Current Rules
+## Current Coverage
 
-The first release focuses on high-signal production gaps in AI-built apps:
+Demo Killer currently works best for:
+
+- Next.js App Router + TypeScript projects.
+- AI/SaaS-style applications, especially projects with API routes, paid capabilities, webhooks, or database writes.
+- Local directories or public GitHub repositories.
+- Teams and independent builders who want an actionable hardening list before handoff.
+
+Current rules focus on high-signal pre-launch risks:
 
 | Rule | Detects |
 | --- | --- |
@@ -165,36 +185,24 @@ The first release focuses on high-signal production gaps in AI-built apps:
 | `DK-DB-001` | Prisma schema without migration evidence |
 | `DK-OBS-001` | Critical mutation path without diagnostic logging |
 
-## Supported Scope
+If Demo Killer cannot collect enough supported evidence, it returns `Insufficient Evidence` instead of dressing uncertainty up as a launch signal.
 
-The current version is intentionally narrow:
+## How To Read Results
 
-- Next.js App Router
-- TypeScript
-- Local static inspection
-- AI/SaaS-style applications
-- Local paths or public GitHub repositories
+Demo Killer does not mark projects as `Production Ready`. Launch still requires deployment validation, runtime checks, load testing, security review, monitoring, and human judgment.
 
-If Demo Killer cannot collect enough supported evidence, it returns `Insufficient Evidence` instead of pretending the project is safe.
+Start with the verdict and Phase 0 findings:
 
-## Verdicts
+| Verdict | What it means | Next step |
+| --- | --- | --- |
+| `Launch Blocked` | A concrete blocker prevents responsible launch | Pause release and fix blockers first |
+| `Demo` | Production gaps exist, but may not all be launch blockers | Follow the hardening plan in phases |
+| `Production Candidate` | Current rules found no known blocker | Continue with deployment validation, load testing, security review, and human review |
+| `Insufficient Evidence` | Demo Killer cannot make a reliable judgment | Add project evidence, switch to human review, or wait for broader framework support |
 
-Demo Killer does not output `Production Ready`.
+## For Agents
 
-That claim requires runtime validation, deployment validation, load testing, security review, backup and recovery checks, monitoring, product review, and operational readiness.
-
-Current verdicts:
-
-| Verdict | Meaning |
-| --- | --- |
-| `Launch Blocked` | A concrete blocker prevents responsible launch |
-| `Demo` | Production gaps exist, but may not all be launch blockers |
-| `Production Candidate` | No known blocker was found in the supported scope; not a guarantee |
-| `Insufficient Evidence` | Demo Killer cannot make a credible judgment |
-
-## Agent Workflow
-
-Recommended workflow before release or production handoff:
+Recommended workflow before handoff:
 
 ```powershell
 npx demokiller init .
@@ -203,33 +211,16 @@ npx demokiller inspect . --markdown
 
 Then have your agent:
 
-1. Read `Launch Blocked` findings first.
-2. Fix Phase 0 blockers before polish work.
+1. Read `Launch Blocked` and Phase 0 findings first.
+2. Fix blockers before polish work or refactors.
 3. Re-run `demokiller inspect . --markdown` after each hardening pass.
-4. Avoid claiming production readiness from UI polish, refactors, or green local demos.
-5. Move to deployment, load testing, security review, and human review only after blockers are gone.
+4. Move to deployment validation, load testing, security review, and human review after blockers are gone.
 
-The core product shape is simple: Demo Killer does not write your app for you; it tells your agent what is still not production-deliverable.
+Demo Killer does not write application code for your agent. It gives the agent an executable, recheckable production-readiness gate.
 
-## Benchmark
+## Development And Contribution
 
-Demo Killer includes a public GitHub benchmark set so the product does not collapse into a single fixture demo. From a source checkout, run:
-
-```powershell
-npm run benchmark
-```
-
-The benchmark reports:
-
-- Total samples
-- Archetype coverage
-- Expected vs actual verdicts
-- Expected vs actual rule ids
-- Clone or analysis errors
-
-Current sample archetypes include `ai-saas`, `payment-starter`, `api-backend`, `admin-panel`, `automation-worker`, `agent-app`, and `content-site`.
-
-## Local Development
+To contribute rules, integrations, or benchmark samples, start with the local checks:
 
 ```powershell
 git clone https://github.com/AVIDS2/demokiller.git
@@ -238,10 +229,15 @@ npm install
 npm test
 npm run typecheck
 npm run build
-node dist/src/cli.js inspect fixtures/next-ai-saas-risky --markdown
 ```
 
-Pre-publish checks:
+The repository also includes a public GitHub benchmark set for checking coverage across project shapes:
+
+```powershell
+npm run benchmark
+```
+
+Recommended pre-publish checks:
 
 ```powershell
 npm test
@@ -253,21 +249,10 @@ npm pack --dry-run
 
 ## Roadmap
 
-- CLI: local inspection, GitHub URL inspection, Markdown/JSON reports.
-- Agent guidance: `demokiller init` writes an agent-facing production contract.
-- MCP: expose `inspect_project`, `list_launch_blockers`, and `generate_hardening_plan`.
-- Skills/plugins: integrate with Codex, Claude Code, Cursor, and similar tools.
-- CI: GitHub Actions and PR comments for pre-launch gates.
+- A fuller MCP server exposing `inspect_project`, `list_launch_blockers`, and `generate_hardening_plan`.
+- Skills and plugin entry points for Codex, Claude Code, Cursor, and similar tools.
+- GitHub Actions and PR comments for team pre-launch review.
 - Broader scope: more frameworks, more production risk domains, more benchmark samples.
-
-## Principles
-
-- No blocker without evidence.
-- No false "production ready" claims.
-- No dashboard before judgment quality.
-- No fake broad framework support.
-- No LLM-only judgment.
-- No confusing "it runs" with "it can be delivered."
 
 ## License
 
