@@ -9,26 +9,13 @@ export interface RouteSourceEvidence {
   line: number;
 }
 
+// ─── Language-agnostic text-based detection ────────────────────────
+
 function pushUnique(target: string[], value: string) {
   if (!target.includes(value)) target.push(value);
 }
 
-export async function inspectRouteSource(
-  root: string,
-  relativePath: string,
-): Promise<RouteSourceEvidence> {
-  const project = new Project({ useInMemoryFileSystem: false });
-  const sourceFile = project.addSourceFileAtPath(path.join(root, relativePath));
-  const text = sourceFile.getFullText();
-  const firstFunction = sourceFile.getFunctions()[0];
-  const line = firstFunction?.getStartLineNumber() ?? 1;
-
-  const capabilities: string[] = [];
-  const controls: string[] = [];
-  const envVars = Array.from(text.matchAll(/process\.env\.([A-Z0-9_]+)/g)).map(
-    (match) => match[1],
-  );
-
+function detectCapabilitiesFromText(text: string, capabilities: string[]) {
   if (text.includes("openai") || text.includes("OpenAI") || text.includes("chat.completions")) {
     pushUnique(capabilities, "callsOpenAI");
   }
@@ -38,16 +25,22 @@ export async function inspectRouteSource(
   if (text.includes("prisma.") && text.match(/\.\s*(delete|update|create|upsert)\s*\(/)) {
     pushUnique(capabilities, "mutatesDatabase");
   }
-  if (text.includes("prisma.") && text.match(/\.\s*(findFirst|findMany|findUnique|findFirstOrThrow|findUniqueOrThrow)\s*\(/)) {
+  if (
+    text.includes("prisma.") &&
+    text.match(/\.\s*(findFirst|findMany|findUnique|findFirstOrThrow|findUniqueOrThrow)\s*\(/)
+  ) {
     pushUnique(capabilities, "readsDatabase");
   }
   if (
     text.match(/await\s+(request|req)\.json\s*\(/) ||
-    text.match(/\b(request|req)\.body\b/)
+    text.match(/\b(request|req)\.body\b/) ||
+    text.match(/\brequest\.json\s*\(/)
   ) {
     pushUnique(capabilities, "consumesRequestBody");
   }
+}
 
+function detectControlsFromText(text: string, controls: string[]) {
   if (
     text.match(/\bauth\s*\(/) ||
     text.includes("getServerSession") ||
@@ -76,6 +69,48 @@ export async function inspectRouteSource(
     pushUnique(controls, "idempotency");
   }
   if (
+    text.match(/\bimport\b.*\bfrom\b.*['"]zod['"]/) ||
+    text.match(/\bimport\b.*\bfrom\b.*['"]yup['"]/) ||
+    text.match(/\bimport\b.*\bfrom\b.*['"]joi['"]/) ||
+    text.match(/\brequire\s*\(\s*['"]zod['"]\s*\)/) ||
+    text.match(/\brequire\s*\(\s*['"]yup['"]\s*\)/) ||
+    text.match(/\brequire\s*\(\s*['"]joi['"]\s*\)/) ||
+    text.match(/\.parse\s*\(/) ||
+    text.match(/\.safeParse\s*\(/) ||
+    text.match(/\.validate\s*\(/)
+  ) {
+    pushUnique(controls, "inputValidation");
+  }
+  if (text.match(/\.catch\s*\(/)) {
+    pushUnique(controls, "errorHandling");
+  }
+  if (
+    text.includes("Access-Control-Allow-Origin") ||
+    text.match(/\bcors\s*\(\s*\)/) ||
+    text.match(/\bcors\s*\(\s*\{\s*\}\s*\)/) ||
+    text.match(/origin:\s*['"]?\*['"]?/)
+  ) {
+    pushUnique(controls, "corsWildcard");
+  }
+}
+
+function extractEnvVars(text: string): string[] {
+  return Array.from(text.matchAll(/(?:process\.env|os\.environ|os\.getenv)\s*\(?['".]*([A-Z0-9_]+)/g)).map(
+    (match) => match[1],
+  );
+}
+
+// ─── TypeScript/JavaScript AST detection (ts-morph) ───────────────
+
+function detectFromJsTsAst(
+  text: string,
+  sourceFile: ReturnType<InstanceType<typeof Project>["addSourceFileAtPath"]>,
+  controls: string[],
+  line: number): number {
+  const firstFunction = sourceFile.getFunctions()[0];
+  const detectedLine = firstFunction?.getStartLineNumber() ?? line;
+
+  if (
     sourceFile
       .getDescendantsOfKind(SyntaxKind.CallExpression)
       .some((call) => {
@@ -91,30 +126,8 @@ export async function inspectRouteSource(
   ) {
     pushUnique(controls, "logging");
   }
-  if (
-    text.match(/\bimport\b.*\bfrom\b.*['"]zod['"]/) ||
-    text.match(/\bimport\b.*\bfrom\b.*['"]yup['"]/) ||
-    text.match(/\bimport\b.*\bfrom\b.*['"]joi['"]/) ||
-    text.match(/\.parse\s*\(/) ||
-    text.match(/\.safeParse\s*\(/) ||
-    text.match(/\.validate\s*\(/)
-  ) {
-    pushUnique(controls, "inputValidation");
-  }
-  if (
-    sourceFile.getDescendantsOfKind(SyntaxKind.TryStatement).length > 0 ||
-    text.match(/\.catch\s*\(/) ||
-    text.match(/error\s*[,)]/)
-  ) {
+  if (sourceFile.getDescendantsOfKind(SyntaxKind.TryStatement).length > 0) {
     pushUnique(controls, "errorHandling");
-  }
-  if (
-    text.includes("Access-Control-Allow-Origin") ||
-    text.match(/\bcors\s*\(\s*\)/) ||
-    text.match(/\bcors\s*\(\s*\{\s*\}\s*\)/) ||
-    text.match(/origin:\s*['"]?\*['"]?/)
-  ) {
-    pushUnique(controls, "corsWildcard");
   }
   if (
     sourceFile
@@ -126,6 +139,44 @@ export async function inspectRouteSource(
   ) {
     pushUnique(controls, "debugStatements");
   }
+
+  return detectedLine;
+}
+
+// ─── Public API ───────────────────────────────────────────────────
+
+const JS_TS_EXTS = [".ts", ".tsx", ".js", ".jsx", ".mts", ".mjs"];
+
+export async function inspectRouteSource(
+  root: string,
+  relativePath: string,
+): Promise<RouteSourceEvidence> {
+  const fullPath = path.join(root, relativePath);
+  const ext = path.extname(relativePath);
+  const capabilities: string[] = [];
+  const controls: string[] = [];
+  let line = 1;
+
+  if (JS_TS_EXTS.includes(ext)) {
+    const project = new Project({ useInMemoryFileSystem: false });
+    const sourceFile = project.addSourceFileAtPath(fullPath);
+    const text = sourceFile.getFullText();
+
+    detectCapabilitiesFromText(text, capabilities);
+    detectControlsFromText(text, controls);
+    const envVars = extractEnvVars(text);
+    line = detectFromJsTsAst(text, sourceFile, controls, line);
+
+    return { path: relativePath, capabilities, controls, envVars, line };
+  }
+
+  // Fallback: text-only detection for unknown file types
+  const { promises: fs } = await import("node:fs");
+  const text = await fs.readFile(fullPath, "utf8");
+
+  detectCapabilitiesFromText(text, capabilities);
+  detectControlsFromText(text, controls);
+  const envVars = extractEnvVars(text);
 
   return { path: relativePath, capabilities, controls, envVars, line };
 }
