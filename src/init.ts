@@ -52,6 +52,48 @@ demokiller inspect . --markdown
 If the verdict is \`Launch Blocked\`, treat the work as not ready for real users until the blocking findings are fixed and rechecked.
 ${managedBlockEnd}`;
 
+const skillContent = `---
+name: demokiller
+description: >
+  Production readiness gate for AI-generated projects.
+  Use before any launch, deployment, release, or production handoff
+  to catch blockers that demo-level code leaves behind.
+when_to_use: >
+  Use this skill when the user asks to check production readiness,
+  run a pre-launch audit, verify deployment safety, or when about
+  to ship code. Also use when the user mentions "launch blocked",
+  "go live", "deploy to production", or "production gate".
+allowed-tools: Bash(npx demokiller *) Bash(npx demokiller-mcp *)
+---
+
+# Demo Killer — Production Gate
+
+Run a production-readiness inspection on the current project and act on the results.
+
+## Current report
+
+\`\`\`!
+npx demokiller inspect . --markdown
+\`\`\`
+
+## How to use this report
+
+1. Read the **Verdict** line first.
+2. If the verdict is \`Launch Blocked\`, read every Phase 0 finding — these are launch blockers that must be fixed before any production traffic.
+3. For each blocker, read the **entry point**, **production consequence**, and **acceptance criteria**. Fix the code to meet every acceptance criterion.
+4. After fixing all Phase 0 blockers, re-run this skill to verify. Do not proceed to Phase 1 or Phase 2 until Phase 0 is clear.
+5. Phase 1 findings are production baseline gaps (logging, env contracts, migrations). Fix these after blockers are resolved.
+6. Phase 2 findings are operational confidence improvements. Fix these last.
+7. Never claim \`Production Ready\`. The best outcome is \`Production Candidate\`, which still requires human review, security review, runtime testing, and deployment verification.
+
+## Rules
+
+- Do not skip, suppress, or downgrade any finding.
+- Do not hide launch blockers behind UI polish or refactoring tasks.
+- Do not add features beyond what the findings require.
+- Re-run the inspection after every hardening pass until no blockers remain.
+`;
+
 async function pathExists(filePath: string): Promise<boolean> {
   try {
     await fs.access(filePath);
@@ -109,12 +151,29 @@ async function ensureAgentsHook(root: string): Promise<InitFileResult> {
   return { path: relativePath, status: exists ? status : "created" };
 }
 
+async function ensureClaudeSkill(root: string): Promise<InitFileResult> {
+  const relativePath = ".claude/skills/demokiller/SKILL.md";
+  const fullPath = path.join(root, ".claude", "skills", "demokiller", "SKILL.md");
+  await fs.mkdir(path.dirname(fullPath), { recursive: true });
+
+  if (await pathExists(fullPath)) {
+    return { path: normalizeRelativePath(relativePath), status: "unchanged" };
+  }
+
+  await fs.writeFile(fullPath, skillContent, "utf8");
+  return { path: normalizeRelativePath(relativePath), status: "created" };
+}
+
 export async function initializeProject(root: string = process.cwd()): Promise<InitResult> {
   const resolvedRoot = path.resolve(root);
   await fs.mkdir(resolvedRoot, { recursive: true });
 
   return {
     root: resolvedRoot,
-    files: [await ensureAgentGuide(resolvedRoot), await ensureAgentsHook(resolvedRoot)],
+    files: [
+      await ensureAgentGuide(resolvedRoot),
+      await ensureAgentsHook(resolvedRoot),
+      await ensureClaudeSkill(resolvedRoot),
+    ],
   };
 }

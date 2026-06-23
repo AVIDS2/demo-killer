@@ -46,6 +46,7 @@ describe("initializeProject", () => {
       expect.arrayContaining([
         { path: ".demokiller/AGENT.md", status: "created" },
         { path: "AGENTS.md", status: "created" },
+        { path: ".claude/skills/demokiller/SKILL.md", status: "created" },
       ]),
     );
   });
@@ -78,6 +79,58 @@ describe("initializeProject", () => {
     await expect(fs.readFile(agentGuidePath, "utf8")).resolves.toBe("custom local guide\n");
     expect(result.files).toEqual(
       expect.arrayContaining([{ path: ".demokiller/AGENT.md", status: "unchanged" }]),
+    );
+  });
+
+  it("creates a Claude Code skill file with correct frontmatter", async () => {
+    const root = await makeProjectRoot();
+
+    const result = await initializeProject(root);
+
+    const skillPath = path.join(root, ".claude", "skills", "demokiller", "SKILL.md");
+    expect(await fileExists(skillPath)).toBe(true);
+
+    const content = await fs.readFile(skillPath, "utf8");
+    expect(content).toContain("name: demokiller");
+    expect(content).toContain("description:");
+    expect(content).toContain("when_to_use:");
+    expect(content).toContain("allowed-tools:");
+    expect(content).toContain("Bash(npx demokiller *)");
+    expect(content).toContain("npx demokiller inspect . --markdown");
+    expect(content).toContain("Launch Blocked");
+
+    expect(result.files).toEqual(
+      expect.arrayContaining([{ path: ".claude/skills/demokiller/SKILL.md", status: "created" }]),
+    );
+  });
+
+  it("does not overwrite an existing skill file", async () => {
+    const root = await makeProjectRoot();
+    const skillDir = path.join(root, ".claude", "skills", "demokiller");
+    const skillPath = path.join(skillDir, "SKILL.md");
+    await fs.mkdir(skillDir, { recursive: true });
+    await fs.writeFile(skillPath, "custom skill content\n");
+
+    const result = await initializeProject(root);
+
+    await expect(fs.readFile(skillPath, "utf8")).resolves.toBe("custom skill content\n");
+    expect(result.files).toEqual(
+      expect.arrayContaining([{ path: ".claude/skills/demokiller/SKILL.md", status: "unchanged" }]),
+    );
+  });
+
+  it("returns unchanged for all files on second init", async () => {
+    const root = await makeProjectRoot();
+
+    await initializeProject(root);
+    const result = await initializeProject(root);
+
+    expect(result.files).toEqual(
+      expect.arrayContaining([
+        { path: ".demokiller/AGENT.md", status: "unchanged" },
+        { path: "AGENTS.md", status: "unchanged" },
+        { path: ".claude/skills/demokiller/SKILL.md", status: "unchanged" },
+      ]),
     );
   });
 });
