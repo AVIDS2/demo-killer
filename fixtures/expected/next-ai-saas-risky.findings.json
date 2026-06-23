@@ -77,6 +77,13 @@
     "asset": "application security"
   },
   {
+    "ruleId": "DK-LOGI-001",
+    "severity": "medium",
+    "entryPoint": "app/api/stripe/webhook/route.ts",
+    "missingControls": ["logSanitization"],
+    "asset": "log integrity and observability"
+  },
+  {
     "ruleId": "DK-ENV-001",
     "severity": "high",
     "missingControls": ["envContract"],

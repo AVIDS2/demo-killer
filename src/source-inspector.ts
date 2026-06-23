@@ -68,6 +68,16 @@ function detectCapabilitiesFromText(text: string, capabilities: string[]) {
   if (text.match(/:\s*[A-Z]\w+\s*[,)]/) && (text.includes("BaseModel") || text.includes("Schema"))) {
     pushUnique(capabilities, "consumesRequestBody");
   }
+
+  // Command execution
+  if (
+    text.match(/\b(exec|execSync|execFile|spawn|spawnSync|child_process)\s*\(/) ||
+    text.match(/\bsubprocess\.(run|Popen|call|check_output)\s*\(/) ||
+    text.match(/\bos\.system\s*\(/) ||
+    text.match(/\bos\.popen\s*\(/)
+  ) {
+    pushUnique(capabilities, "commandExecution");
+  }
 }
 
 function detectControlsFromText(text: string, controls: string[]) {
@@ -151,6 +161,41 @@ function detectControlsFromText(text: string, controls: string[]) {
     text.match(/allow_origins\s*=\s*\[\s*['"]?\*['"]?\s*\]/)
   ) {
     pushUnique(controls, "corsWildcard");
+  }
+
+  // SSRF risk — fetch/requests with user-controlled URL
+  if (
+    text.match(/\bfetch\s*\(\s*(req|request|body|params|query|input|url)/) ||
+    text.match(/\baxios\s*\.\s*(get|post|put|delete)\s*\(\s*(req|request|body|params)/) ||
+    text.match(/\brequests\s*\.\s*(get|post|put|delete)\s*\(\s*(req|request|body|params|url)/) ||
+    text.match(/\bhttp\s*\.\s*(get|post|request)\s*\(\s*(req|request|body|params|url)/)
+  ) {
+    pushUnique(controls, "ssrfRisk");
+  }
+
+  // Hardcoded secrets
+  if (
+    text.match(/['"]sk-[a-zA-Z0-9]{20,}['"]/) ||
+    text.match(/['"]sk_live_[a-zA-Z0-9]+['"]/) ||
+    text.match(/['"]sk_test_[a-zA-Z0-9]+['"]/) ||
+    text.match(/['"]AKIA[A-Z0-9]{16}['"]/) ||
+    text.match(/['"]ghp_[a-zA-Z0-9]{36}['"]/) ||
+    text.match(/['"]xoxb-[a-zA-Z0-9-]+['"]/) ||
+    text.match(/['"]whsec_[a-zA-Z0-9]+['"]/) ||
+    text.match(/(SECRET|TOKEN|PASSWORD|API_KEY)\s*[:=]\s*['"][a-zA-Z0-9]{16,}['"]/i)
+  ) {
+    pushUnique(controls, "hardcodedSecrets");
+  }
+
+  // Structured logging (used to suppress log injection false positives)
+  if (
+    text.includes("structuredLog") ||
+    text.includes("JSON.stringify") ||
+    text.match(/log\.\w+\s*\([^)]*\{/) ||
+    text.match(/logger\.\w+\s*\([^)]*\{/) ||
+    text.match(/auditLog\s*\([^)]*\{/)
+  ) {
+    pushUnique(controls, "logSanitization");
   }
 }
 

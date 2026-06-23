@@ -191,6 +191,10 @@ Demo Killer 现在最适合检查这类项目：
 | `DK-DATA-001` | 数据库查询结果是否可能未经字段过滤直接返回 |
 | `DK-CORS-001` | API 路由是否允许任意来源的跨域请求 |
 | `DK-DEBUG-001` | 生产路由是否包含 console.log 等调试语句 |
+| `DK-SSRF-001` | HTTP 请求是否使用了可能由用户控制的 URL |
+| `DK-CMDI-001` | 路由是否执行系统命令，可能存在命令注入风险 |
+| `DK-SECRET-001` | 源码中是否包含硬编码的 API 密钥或令牌 |
+| `DK-LOGI-001` | 用户输入是否可能直接写入日志（日志注入） |
 | `DK-ENV-001` | 生产环境变量是否有明确 env contract |
 | `DK-DB-001` | Prisma schema 是否缺少 migration 证据 |
 | `DK-OBS-001` | 关键 mutation 路径是否缺少诊断日志 |

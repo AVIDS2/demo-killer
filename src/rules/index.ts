@@ -2,15 +2,19 @@ import { buildInventory, type ProjectInventory } from "../inventory.js";
 import { inspectRouteSource } from "../source-inspector.js";
 import type { Finding } from "../types.js";
 import { adminMutationAuthRule } from "./admin-mutation-auth.js";
+import { commandInjectionRule } from "./command-injection.js";
 import { corsWildcardRule } from "./cors-wildcard.js";
 import { debugLeakRule } from "./debug-leak.js";
 import { envContractRule } from "./env-contract.js";
 import { errorLeakRule } from "./error-leak.js";
+import { hardcodedSecretRule } from "./hardcoded-secret.js";
 import { inputValidationRule } from "./input-validation.js";
+import { logInjectionRule } from "./log-injection.js";
 import { migrationPostureRule } from "./migration-posture.js";
 import { observabilityRule } from "./observability.js";
 import { publicAiRouteRule } from "./public-ai-route.js";
 import { sensitiveDataRule } from "./sensitive-data.js";
+import { ssrfRule } from "./ssrf.js";
 import { webhookSafetyRule } from "./webhook-safety.js";
 
 async function readDeclaredEnvVars(root: string, envExamplePath?: string): Promise<string[]> {
@@ -48,8 +52,12 @@ export async function analyzeFindings(root: string): Promise<AnalysisResult> {
     ...routeEvidence.flatMap(observabilityRule),
     ...routeEvidence.flatMap(corsWildcardRule),
     ...routeEvidence.flatMap(debugLeakRule),
+    ...routeEvidence.flatMap(ssrfRule),
+    ...routeEvidence.flatMap(commandInjectionRule),
+    ...routeEvidence.flatMap(hardcodedSecretRule),
     ...routeEvidence.flatMap(inputValidationRule),
     ...routeEvidence.flatMap(errorLeakRule),
+    ...routeEvidence.flatMap(logInjectionRule),
     ...routeEvidence.flatMap(sensitiveDataRule),
     ...envContractRule(inventory, usedEnvVars, declaredEnvVars),
     ...migrationPostureRule(inventory),
