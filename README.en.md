@@ -175,6 +175,7 @@ Demo Killer currently works best for:
 
 - Next.js App Router + TypeScript projects.
 - Express / Fastify + TypeScript projects, especially those with API routes.
+- FastAPI / Flask / Django + Python projects.
 - AI/SaaS-style applications, especially projects with API routes, paid capabilities, webhooks, or database writes.
 - Local directories or public GitHub repositories.
 - Teams and independent builders who want an actionable hardening list before handoff.

@@ -12,7 +12,7 @@ export async function runInspection(projectPath: string): Promise<AnalysisReport
   const resolved = await resolveRepository(projectPath);
   try {
     const { findings, inventory } = await analyzeFindings(resolved.root);
-    const hasEvidence = (inventory.stack === "nextjs" || inventory.stack === "express" || inventory.stack === "fastify") && inventory.apiRoutes.length > 0;
+    const hasEvidence = (inventory.stack === "nextjs" || inventory.stack === "express" || inventory.stack === "fastify" || inventory.stack === "flask" || inventory.stack === "fastapi" || inventory.stack === "django") && inventory.apiRoutes.length > 0;
     return buildJsonReport(findings, new Date().toISOString(), {
       hasSupportedProjectEvidence: hasEvidence,
     });
