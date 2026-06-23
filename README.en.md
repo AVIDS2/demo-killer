@@ -328,11 +328,30 @@ npm audit --json
 npm pack --dry-run
 ```
 
+## How To Add A Rule
+
+Adding a rule takes 3 steps:
+
+**1. Add a detection signal in `src/source-inspector.ts`**
+
+For text-detectable patterns (regex/string matching), add to `detectCapabilitiesFromText()` or `detectControlsFromText()`. For AST-only patterns, add to `detectFromJsTsAst()`.
+
+**2. Create a rule file in `src/rules/`**
+
+Follow existing rules (e.g. `src/rules/input-validation.ts`). Implement a function that takes `RouteSourceEvidence` and returns `Finding[]`.
+
+**3. Register in `src/rules/index.ts`**
+
+Import the new rule and add `...routeEvidence.flatMap(yourNewRule)` to the `analyzeFindings` return array.
+
+Update `fixtures/expected/*.findings.json` golden files and the README rule table, then run `npm test`.
+
 ## Roadmap
 
 - Plugin entry points for non-MCP, non-Skill agents.
-- GitHub Actions and PR comments for team pre-launch review.
-- Broader scope: more frameworks, more production risk domains, more benchmark samples.
+- Python (Flask/FastAPI/Django) detector.
+- Go (Gin/Echo) detector.
+- More production risk domains and benchmark samples.
 
 ## License
 

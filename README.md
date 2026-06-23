@@ -343,11 +343,30 @@ npm audit --json
 npm pack --dry-run
 ```
 
+## 如何加规则
+
+加一条规则只需要 3 步：
+
+**1. 在 `src/source-inspector.ts` 添加检测信号**
+
+如果是文本可检测的模式（正则/string 匹配），加到 `detectCapabilitiesFromText()` 或 `detectControlsFromText()`。如果是 AST 才能检测的模式，加到 `detectFromJsTsAst()`。
+
+**2. 在 `src/rules/` 创建规则文件**
+
+参考现有规则（如 `src/rules/input-validation.ts`），实现一个接收 `RouteSourceEvidence` 并返回 `Finding[]` 的函数。
+
+**3. 在 `src/rules/index.ts` 注册规则**
+
+导入新规则函数，在 `analyzeFindings` 的返回数组中加入 `...routeEvidence.flatMap(yourNewRule)`。
+
+更新 `fixtures/expected/*.findings.json` golden files 和 `README.md` 规则表后，跑 `npm test` 验证。
+
 ## Roadmap
 
 - Plugin 入口，让非 MCP / 非 Skill 的 agent 也能原生接入。
-- GitHub Actions / PR comment，用在团队上线前 review。
-- 更广支持：更多框架、更多生产风险域、更多 benchmark 样本。
+- Python (Flask/FastAPI/Django) 检测器。
+- Go (Gin/Echo) 检测器。
+- 更多生产风险域和 benchmark 样本。
 
 ## License
 
