@@ -7,6 +7,10 @@ export type StackType =
   | "gin" | "echo" | "fiber"
   | "actix" | "axum"
   | "spring-boot"
+  | "laravel" | "rails" | "sinatra"
+  | "aspnet" | "vapor" | "rocket"
+  | "echo-kt" | "ktor"
+  | "http4s" | "akka"
   | "unknown";
 
 export interface ProjectInventory {
@@ -23,19 +27,18 @@ export interface ProjectInventory {
   };
 }
 
+const SKIP_DIRS = new Set([
+  "node_modules", ".next", "dist", "__pycache__", ".venv", "venv",
+  "target", "vendor", ".git", "build", "out", "bin", "obj",
+]);
+
 async function walk(root: string, dir = root): Promise<string[]> {
   const entries = await fs.readdir(dir, { withFileTypes: true });
   const result: string[] = [];
 
   for (const entry of entries) {
+    if (SKIP_DIRS.has(entry.name)) continue;
     const fullPath = path.join(dir, entry.name);
-    if (
-      entry.name === "node_modules" || entry.name === ".next" ||
-      entry.name === "dist" || entry.name === "__pycache__" ||
-      entry.name === ".venv" || entry.name === "venv" ||
-      entry.name === "target" || entry.name === "vendor"
-    ) continue;
-
     if (entry.isDirectory()) {
       result.push(...(await walk(root, fullPath)));
     } else {
@@ -46,11 +49,38 @@ async function walk(root: string, dir = root): Promise<string[]> {
   return result;
 }
 
+// ─── Extension sets ──────────────────────────────────────────────
+
 const JS_TS_EXTS = [".ts", ".tsx", ".js", ".jsx", ".mts", ".mjs"];
 const PYTHON_EXTS = [".py"];
 const GO_EXTS = [".go"];
 const RUST_EXTS = [".rs"];
 const JAVA_EXTS = [".java"];
+const KOTLIN_EXTS = [".kt", ".kts"];
+const SCALA_EXTS = [".scala", ".sc"];
+const CS_EXTS = [".cs"];
+const PHP_EXTS = [".php"];
+const RUBY_EXTS = [".rb"];
+const SWIFT_EXTS = [".swift"];
+const C_EXTS = [".c", ".h"];
+const CPP_EXTS = [".cpp", ".cxx", ".cc", ".hpp"];
+const LUA_EXTS = [".lua"];
+const SHELL_EXTS = [".sh", ".bash", ".zsh"];
+const DART_EXTS = [".dart"];
+const ZIG_EXTS = [".zig"];
+
+const ALL_CODE_EXTS = [
+  ...JS_TS_EXTS, ...PYTHON_EXTS, ...GO_EXTS, ...RUST_EXTS, ...JAVA_EXTS,
+  ...KOTLIN_EXTS, ...SCALA_EXTS, ...CS_EXTS, ...PHP_EXTS, ...RUBY_EXTS,
+  ...SWIFT_EXTS, ...C_EXTS, ...CPP_EXTS, ...LUA_EXTS, ...SHELL_EXTS,
+  ...DART_EXTS, ...ZIG_EXTS,
+];
+
+function matchesExts(file: string, exts: string[]): boolean {
+  return exts.some((ext) => file.endsWith(ext));
+}
+
+// ─── Route pattern matchers ──────────────────────────────────────
 
 async function fileContainsPattern(root: string, file: string, patterns: RegExp[]): Promise<boolean> {
   try {
@@ -61,46 +91,41 @@ async function fileContainsPattern(root: string, file: string, patterns: RegExp[
   }
 }
 
-const JS_ROUTE_PATTERNS = [
-  /\bapp\s*\.\s*(get|post|put|patch|delete)\s*\(/,
-  /\brouter\s*\.\s*(get|post|put|patch|delete)\s*\(/,
-  /\bfastify\s*\.\s*(get|post|put|patch|delete)\s*\(/,
-  /\bfastify\s*\.\s*route\s*\(/,
-];
+const ROUTE_PATTERNS: Record<string, RegExp[]> = {
+  js: [/\bapp\s*\.\s*(get|post|put|patch|delete)\s*\(/, /\brouter\s*\.\s*(get|post|put|patch|delete)\s*\(/, /\bfastify\s*\.\s*(get|post|put|patch|delete)\s*\(/],
+  python: [/@(?:app|router|api)\s*\.\s*(get|post|put|patch|delete|route)\s*\(/, /@(?:app|bp)\s*\.\s*route\s*\(/, /\bpath\s*\(\s*['"]/, /@api_view\s*\(/],
+  go: [/\b[re]\s*\.\s*(GET|POST|PUT|PATCH|DELETE)\s*\(/, /\bapp\s*\.\s*(Get|Post|Put|Delete)\s*\(/, /\brouter\s*\.\s*Handle\s*\(/],
+  rust: [/#\[(get|post|put|delete)\s*\(/, /\.route\s*\(\s*["']/],
+  java: [/@(Get|Post|Put|Delete|Request)Mapping\s*\(/, /@RestController/],
+  kotlin: [/@(Get|Post|Put|Delete|Request)Mapping\s*\(/, /\broute\s*\(/],
+  scala: [/@(Get|Post|Put|Delete)\s*\(/, /\bget\s*\(\s*["']/, /\bpost\s*\(\s*["']/],
+  cs: [/\[Http(Get|Post|Put|Delete)\]/, /\[Route\s*\(/],
+  php: [/Route::(get|post|put|delete|any)\s*\(/, /\$app->(get|post|put|delete)\s*\(/, /#\[Route/],
+  ruby: [/\b(get|post|put|delete|patch)\s+['"]\//, /\brouter\s+/],
+  swift: [/\bapp\s*\.\s*(get|post|put|delete)\s*\(/, /\brouter\s*\./],
+  c: [/\bcgi_handle_request\s*\(/],
+  cpp: [/\bserver\.(get|post|put|delete)\s*\(/],
+  dart: [/\bapp\.(get|post|put|delete)\s*\(/, /\brouter\.(get|post)\s*\(/],
+  zig: [/\brouter\.(get|post|put|delete)\s*\(/],
+  lua: [/\bapp:(get|post|put|delete)\s*\(/],
+  shell: [/\bcurl\s+-X\s+(GET|POST|PUT|DELETE)/],
+};
 
-const PYTHON_ROUTE_PATTERNS = [
-  /@(?:app|router|api)\s*\.\s*(get|post|put|patch|delete|route)\s*\(/,
-  /@(?:app|bp)\s*\.\s*route\s*\(/,
-  /\bpath\s*\(\s*['"]/,
-  /\bre_path\s*\(\s*['"]/,
-  /@api_view\s*\(/,
-];
+const EXTS_FOR_PATTERN: Record<string, string[]> = {
+  js: JS_TS_EXTS, python: PYTHON_EXTS, go: GO_EXTS, rust: RUST_EXTS,
+  java: JAVA_EXTS, kotlin: KOTLIN_EXTS, scala: SCALA_EXTS, cs: CS_EXTS,
+  php: PHP_EXTS, ruby: RUBY_EXTS, swift: SWIFT_EXTS, c: C_EXTS,
+  cpp: CPP_EXTS, dart: DART_EXTS, zig: ZIG_EXTS, lua: LUA_EXTS, shell: SHELL_EXTS,
+};
 
-const GO_ROUTE_PATTERNS = [
-  /\b[re]\s*\.\s*(GET|POST|PUT|PATCH|DELETE)\s*\(/,
-  /\bapp\s*\.\s*(Get|Post|Put|Delete)\s*\(/,
-  /\brouter\s*\.\s*Handle\s*\(/,
-  /\be\.\s*(GET|POST|PUT|DELETE)\s*\(/,
-];
+async function findRoutes(root: string, files: string[], lang: string): Promise<string[]> {
+  const exts = EXTS_FOR_PATTERN[lang] ?? [];
+  const patterns = ROUTE_PATTERNS[lang] ?? [];
+  if (exts.length === 0 || patterns.length === 0) return [];
 
-const RUST_ROUTE_PATTERNS = [
-  /#\[get\s*\(/,
-  /#\[post\s*\(/,
-  /#\[put\s*\(/,
-  /#\[delete\s*\(/,
-  /\.route\s*\(\s*["']/,
-];
-
-const JAVA_ROUTE_PATTERNS = [
-  /@(Get|Post|Put|Delete|Request)Mapping\s*\(/,
-  /@RestController/,
-];
-
-async function findRoutes(root: string, files: string[], exts: string[], patterns: RegExp[], excludeDirs: string[] = []): Promise<string[]> {
   const candidates = files.filter((f) => {
-    if (!exts.some((ext) => f.endsWith(ext))) return false;
-    if (excludeDirs.some((d) => f.includes(d))) return false;
-    if (f.includes("test") || f.includes("spec") || f.includes("Test.") || f.includes("_test.")) return false;
+    if (!matchesExts(f, exts)) return false;
+    if (f.includes("test") || f.includes("spec") || f.includes("Test.") || f.includes("_test.") || f.includes("conftest")) return false;
     return true;
   });
 
@@ -113,176 +138,258 @@ async function findRoutes(root: string, files: string[], exts: string[], pattern
   return results;
 }
 
-// ─── Dependency parsers ───────────────────────────────────────────
+// ─── Dependency parsers ──────────────────────────────────────────
 
 type DepMap = Record<string, string>;
 
-async function readGoDeps(root: string): Promise<DepMap> {
-  const deps: DepMap = {};
+async function readJsonDeps(root: string, file: string): Promise<DepMap> {
   try {
-    const text = await fs.readFile(path.join(root, "go.mod"), "utf8");
-    for (const match of text.matchAll(/^\s*([a-z0-9./-]+)\s+v/gm)) {
-      deps[match[1].toLowerCase()] = "latest";
-    }
-  } catch { /* no go.mod */ }
-  return deps;
+    const data = JSON.parse(await fs.readFile(path.join(root, file), "utf8"));
+    return { ...data.dependencies, ...data.devDependencies };
+  } catch { return {}; }
+}
+
+async function readFileDeps(root: string, file: string, regex: RegExp): Promise<DepMap> {
+  try {
+    const text = await fs.readFile(path.join(root, file), "utf8");
+    const deps: DepMap = {};
+    for (const m of text.matchAll(regex)) deps[m[1].toLowerCase()] = "latest";
+    return deps;
+  } catch { return {}; }
+}
+
+async function readGoDeps(root: string): Promise<DepMap> {
+  return readFileDeps(root, "go.mod", /^\s*([a-z0-9./-]+)\s+v/gm);
 }
 
 async function readCargoDeps(root: string): Promise<DepMap> {
-  const deps: DepMap = {};
   try {
     const text = await fs.readFile(path.join(root, "Cargo.toml"), "utf8");
-    const depSection = text.match(/\[dependencies\]([\s\S]*?)(?:\n\[|\n*$)/);
-    if (depSection) {
-      for (const match of depSection[1].matchAll(/^([a-zA-Z0-9_-]+)\s*=/gm)) {
-        deps[match[1].toLowerCase()] = "latest";
-      }
+    const section = text.match(/\[dependencies\]([\s\S]*?)(?:\n\[|\n*$)/);
+    const deps: DepMap = {};
+    if (section) {
+      for (const m of section[1].matchAll(/^([a-zA-Z0-9_-]+)\s*=/gm)) deps[m[1].toLowerCase()] = "latest";
     }
-  } catch { /* no Cargo.toml */ }
-  return deps;
+    return deps;
+  } catch { return {}; }
 }
 
-async function readJavaDeps(root: string): Promise<DepMap> {
+async function readGradleDeps(root: string): Promise<DepMap> {
   const deps: DepMap = {};
-
-  // build.gradle
-  try {
-    const text = await fs.readFile(path.join(root, "build.gradle"), "utf8");
-    if (text.includes("spring-boot") || text.includes("org.springframework.boot")) {
-      deps["spring-boot"] = "latest";
-    }
-  } catch { /* no build.gradle */ }
-
-  // pom.xml
+  for (const file of ["build.gradle", "build.gradle.kts"]) {
+    try {
+      const text = await fs.readFile(path.join(root, file), "utf8");
+      if (text.includes("spring-boot") || text.includes("org.springframework.boot")) deps["spring-boot"] = "latest";
+      if (text.includes("io.ktor")) deps["ktor"] = "latest";
+      if (text.includes("com.typesafe.akka")) deps["akka"] = "latest";
+    } catch { /* no file */ }
+  }
   try {
     const text = await fs.readFile(path.join(root, "pom.xml"), "utf8");
-    if (text.includes("spring-boot") || text.includes("spring-boot-starter")) {
-      deps["spring-boot"] = "latest";
-    }
-  } catch { /* no pom.xml */ }
-
+    if (text.includes("spring-boot") || text.includes("spring-boot-starter")) deps["spring-boot"] = "latest";
+    if (text.includes("http4s")) deps["http4s"] = "latest";
+  } catch { /* no file */ }
   return deps;
 }
 
 async function readPythonDeps(root: string): Promise<DepMap> {
   const deps: DepMap = {};
-
-  try {
-    const text = await fs.readFile(path.join(root, "requirements.txt"), "utf8");
-    for (const line of text.split(/\r?\n/)) {
-      const trimmed = line.trim();
-      if (!trimmed || trimmed.startsWith("#")) continue;
-      const name = trimmed.split(/[>=<\[!;]/)[0].trim().toLowerCase();
-      if (name) deps[name] = "latest";
-    }
-  } catch { /* no requirements.txt */ }
-
-  try {
-    const text = await fs.readFile(path.join(root, "pyproject.toml"), "utf8");
-    const depBlockMatch = text.match(/\[project\][\s\S]*?dependencies\s*=\s*\[([\s\S]*?)\]/);
-    if (depBlockMatch) {
-      for (const match of depBlockMatch[1].matchAll(/['"]([a-zA-Z0-9_-]+)/g)) {
-        deps[match[1].toLowerCase()] = "latest";
-      }
-    }
-  } catch { /* no pyproject.toml */ }
-
+  for (const line of (await readFileContent(root, "requirements.txt")).split(/\r?\n/)) {
+    const t = line.trim();
+    if (t && !t.startsWith("#")) deps[t.split(/[>=<\[!;]/)[0].trim().toLowerCase()] = "latest";
+  }
+  const pyproj = await readFileContent(root, "pyproject.toml");
+  const m = pyproj.match(/\[project\][\s\S]*?dependencies\s*=\s*\[([\s\S]*?)\]/);
+  if (m) for (const x of m[1].matchAll(/['"]([a-zA-Z0-9_-]+)/g)) deps[x[1].toLowerCase()] = "latest";
   return deps;
 }
 
-// ─── Stack detection ──────────────────────────────────────────────
-
-function detectJsStack(deps: DepMap, devDeps: DepMap): StackType {
-  if (deps.next || devDeps.next) return "nextjs";
-  if (deps.fastify || devDeps.fastify) return "fastify";
-  if (deps.express || devDeps.express) return "express";
-  return "unknown";
+async function readFileContent(root: string, file: string): Promise<string> {
+  try { return await fs.readFile(path.join(root, file), "utf8"); } catch { return ""; }
 }
 
-function detectPythonStack(deps: DepMap): StackType {
-  if (deps.fastapi) return "fastapi";
-  if (deps.django) return "django";
-  if (deps.flask) return "flask";
-  return "unknown";
+async function readPhpDeps(root: string): Promise<DepMap> {
+  try {
+    const data = JSON.parse(await fs.readFile(path.join(root, "composer.json"), "utf8"));
+    return { ...data.require, ...data["require-dev"] };
+  } catch { return {}; }
 }
 
-function detectGoStack(deps: DepMap): StackType {
-  if (deps["github.com/gin-gonic/gin"]) return "gin";
-  if (deps["github.com/labstack/echo"]) return "echo";
-  if (deps["github.com/gofiber/fiber"]) return "fiber";
-  return "unknown";
+async function readRubyDeps(root: string): Promise<DepMap> {
+  const text = await readFileContent(root, "Gemfile");
+  const deps: DepMap = {};
+  for (const m of text.matchAll(/gem\s+['"]([a-zA-Z0-9_-]+)['"]/g)) deps[m[1].toLowerCase()] = "latest";
+  return deps;
 }
 
-function detectRustStack(deps: DepMap): StackType {
-  if (deps["actix-web"]) return "actix";
-  if (deps["axum"]) return "axum";
-  return "unknown";
+async function readSwiftDeps(root: string): Promise<DepMap> {
+  const text = await readFileContent(root, "Package.swift");
+  const deps: DepMap = {};
+  if (text.includes("vapor")) deps["vapor"] = "latest";
+  if (text.includes("Kitura")) deps["kitura"] = "latest";
+  return deps;
 }
 
-function detectJavaStack(deps: DepMap): StackType {
-  if (deps["spring-boot"]) return "spring-boot";
+async function readCsDeps(root: string): Promise<DepMap> {
+  const deps: DepMap = {};
+  for (const file of (await fs.readdir(root)).filter(f => f.endsWith(".csproj"))) {
+    const text = await readFileContent(root, file);
+    if (text.includes("Microsoft.AspNetCore") || text.includes("Microsoft.NET.Sdk.Web")) deps["aspnet"] = "latest";
+  }
+  return deps;
+}
+
+async function readZigDeps(root: string): Promise<DepMap> {
+  return {}; // Zig has no standard package manager yet
+}
+
+// ─── Stack detection ─────────────────────────────────────────────
+
+function detectJsStack(d: DepMap): StackType {
+  if (d.next) return "nextjs";
+  if (d.fastify) return "fastify";
+  if (d.express) return "express";
+  return "unknown";
+}
+function detectPythonStack(d: DepMap): StackType {
+  if (d.fastapi) return "fastapi";
+  if (d.django) return "django";
+  if (d.flask) return "flask";
+  return "unknown";
+}
+function detectGoStack(d: DepMap): StackType {
+  if (d["github.com/gin-gonic/gin"]) return "gin";
+  if (d["github.com/labstack/echo"]) return "echo";
+  if (d["github.com/gofiber/fiber"]) return "fiber";
+  return "unknown";
+}
+function detectRustStack(d: DepMap): StackType {
+  if (d["actix-web"]) return "actix";
+  if (d["axum"]) return "axum";
+  if (d["rocket"]) return "rocket";
+  return "unknown";
+}
+function detectJavaStack(d: DepMap): StackType {
+  if (d["spring-boot"]) return "spring-boot";
+  return "unknown";
+}
+function detectKotlinStack(d: DepMap): StackType {
+  if (d["ktor"]) return "ktor";
+  if (d["spring-boot"]) return "spring-boot";
+  return "unknown";
+}
+function detectScalaStack(d: DepMap): StackType {
+  if (d["http4s"]) return "http4s";
+  if (d["akka"]) return "akka";
+  return "unknown";
+}
+function detectPhpStack(d: DepMap): StackType {
+  if (d["laravel/framework"]) return "laravel";
+  return "unknown";
+}
+function detectRubyStack(d: DepMap): StackType {
+  if (d["rails"]) return "rails";
+  if (d["sinatra"]) return "sinatra";
+  return "unknown";
+}
+function detectSwiftStack(d: DepMap): StackType {
+  if (d["vapor"]) return "vapor";
+  return "unknown";
+}
+function detectCsStack(d: DepMap): StackType {
+  if (d["aspnet"]) return "aspnet";
   return "unknown";
 }
 
 // ─── Main inventory builder ──────────────────────────────────────
 
+type DetectorResult = { stack: StackType; lang: string; deps: DepMap };
+
+async function tryDetect(root: string): Promise<DetectorResult> {
+  // JS/TS
+  let deps: DepMap = {};
+  try {
+    const pkg = JSON.parse(await fs.readFile(path.join(root, "package.json"), "utf8"));
+    deps = { ...(pkg.dependencies ?? {}), ...(pkg.devDependencies ?? {}) };
+  } catch {}
+  let stack = detectJsStack(deps);
+  if (stack !== "unknown") return { stack, lang: "js", deps };
+
+  // Python
+  deps = await readPythonDeps(root);
+  stack = detectPythonStack(deps);
+  if (stack !== "unknown") return { stack, lang: "python", deps };
+
+  // Go
+  deps = await readGoDeps(root);
+  stack = detectGoStack(deps);
+  if (stack !== "unknown") return { stack, lang: "go", deps };
+
+  // Rust
+  deps = await readCargoDeps(root);
+  stack = detectRustStack(deps);
+  if (stack !== "unknown") return { stack, lang: "rust", deps };
+
+  // Java/Kotlin/Scala
+  deps = await readGradleDeps(root);
+  stack = detectJavaStack(deps);
+  if (stack !== "unknown") return { stack, lang: "java", deps };
+  stack = detectKotlinStack(deps);
+  if (stack !== "unknown") return { stack, lang: "kotlin", deps };
+  stack = detectScalaStack(deps);
+  if (stack !== "unknown") return { stack, lang: "scala", deps };
+
+  // PHP
+  deps = await readPhpDeps(root);
+  stack = detectPhpStack(deps);
+  if (stack !== "unknown") return { stack, lang: "php", deps };
+
+  // Ruby
+  deps = await readRubyDeps(root);
+  stack = detectRubyStack(deps);
+  if (stack !== "unknown") return { stack, lang: "ruby", deps };
+
+  // Swift
+  deps = await readSwiftDeps(root);
+  stack = detectSwiftStack(deps);
+  if (stack !== "unknown") return { stack, lang: "swift", deps };
+
+  // C#
+  deps = await readCsDeps(root);
+  stack = detectCsStack(deps);
+  if (stack !== "unknown") return { stack, lang: "cs", deps };
+
+  return { stack: "unknown", lang: "unknown", deps: {} };
+}
+
 export async function buildInventory(root: string): Promise<ProjectInventory> {
   const files = await walk(root);
   const hasDockerfile = files.some((f) => f === "Dockerfile" || f.endsWith("/Dockerfile"));
+  const detected = await tryDetect(root);
+  let apiRoutes: string[] = [];
 
-  // Try Node.js
+  if (detected.lang === "js") {
+    apiRoutes = detected.stack === "nextjs"
+      ? files.filter((f) => f.startsWith("app/api/") && f.endsWith("/route.ts"))
+      : await findRoutes(root, files, "js");
+  } else {
+    apiRoutes = await findRoutes(root, files, detected.lang);
+  }
+
+  // Read package.json for the inventory (even for non-JS projects, it might exist)
   let packageJson: { dependencies?: DepMap; devDependencies?: DepMap } = { dependencies: {}, devDependencies: {} };
   try {
     packageJson = JSON.parse(await fs.readFile(path.join(root, "package.json"), "utf8"));
   } catch { /* no package.json */ }
 
-  const dependencies = packageJson.dependencies ?? {};
-  const devDependencies = packageJson.devDependencies ?? {};
-  let stack = detectJsStack(dependencies, devDependencies);
-  let apiRoutes: string[] = [];
-
-  if (stack !== "unknown") {
-    apiRoutes = stack === "nextjs"
-      ? files.filter((f) => f.startsWith("app/api/") && f.endsWith("/route.ts"))
-      : await findRoutes(root, files, JS_TS_EXTS, JS_ROUTE_PATTERNS, ["node_modules", ".next", "dist/"]);
-  } else {
-    // Try Python
-    const pyDeps = await readPythonDeps(root);
-    stack = detectPythonStack(pyDeps);
-    if (stack !== "unknown") {
-      apiRoutes = await findRoutes(root, files, PYTHON_EXTS, PYTHON_ROUTE_PATTERNS, ["__pycache__", ".venv", "venv/"]);
-    } else {
-      // Try Go
-      const goDeps = await readGoDeps(root);
-      stack = detectGoStack(goDeps);
-      if (stack !== "unknown") {
-        apiRoutes = await findRoutes(root, files, GO_EXTS, GO_ROUTE_PATTERNS, ["vendor/"]);
-      } else {
-        // Try Rust
-        const rustDeps = await readCargoDeps(root);
-        stack = detectRustStack(rustDeps);
-        if (stack !== "unknown") {
-          apiRoutes = await findRoutes(root, files, RUST_EXTS, RUST_ROUTE_PATTERNS, ["target/"]);
-        } else {
-          // Try Java
-          const javaDeps = await readJavaDeps(root);
-          stack = detectJavaStack(javaDeps);
-          if (stack !== "unknown") {
-            apiRoutes = await findRoutes(root, files, JAVA_EXTS, JAVA_ROUTE_PATTERNS, ["build/", "target/"]);
-          }
-        }
-      }
-    }
-  }
-
   return {
     root,
-    stack,
+    stack: detected.stack,
     apiRoutes,
     envExamplePath: files.includes(".env.example") ? ".env.example" : undefined,
     prismaSchemaPath: files.includes("prisma/schema.prisma") ? "prisma/schema.prisma" : undefined,
     migrationPaths: files.filter((f) => f.startsWith("prisma/migrations/") && f.endsWith(".sql")),
     hasDockerfile,
-    packageJson: { dependencies, devDependencies },
+    packageJson: { dependencies: packageJson.dependencies ?? {}, devDependencies: packageJson.devDependencies ?? {} },
   };
 }

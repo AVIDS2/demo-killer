@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.4.0
+
+### Breaking Changes
+
+- **Migrated from ts-morph to web-tree-sitter**: All AST-based detection now uses tree-sitter via pre-compiled WASM grammars. ts-morph dependency removed.
+
+### Features
+
+- **18 languages supported**: JavaScript, TypeScript, Python, Go, Rust, Java, Kotlin, Scala, C#, PHP, Ruby, Swift, C, C++, Lua, Shell, Dart, Zig.
+- **21 frameworks**: Next.js, Express, Fastify, FastAPI, Flask, Django, Gin, Echo, Fiber, Actix, Axum, Rocket, Spring Boot, Ktor, Laravel, Rails, Sinatra, ASP.NET, Vapor, http4s, Akka.
+- **Quality metrics**: Routes now include `metrics` field with cyclomatic complexity, function count, average function length, and longest function.
+- **Tree-sitter AST detection**: Logging, debug statements, error handling detected via AST for all 18 languages (higher precision than text-only).
+- **New dependency parsers**: composer.json (PHP), Gemfile (Ruby), .csproj (C#), Package.swift (Swift), build.gradle (Kotlin/Scala).
+
+### Architecture
+
+- `web-tree-sitter` + `tree-sitter-wasms` replaces `ts-morph` (no native compilation needed, works on all platforms).
+- WASM grammars loaded on-demand per file extension.
+- Text-based detection retained as fallback and supplement.
+
 ## 0.3.0
 
 ### Features

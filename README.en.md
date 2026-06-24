@@ -173,13 +173,20 @@ demokiller inspect . --markdown
 
 Demo Killer currently works best for:
 
-- Next.js App Router + TypeScript projects.
-- Express / Fastify + TypeScript projects, especially those with API routes.
-- FastAPI / Flask / Django + Python projects.
-- Gin / Echo / Fiber + Go projects.
-- Actix / Axum + Rust projects.
-- Spring Boot + Java projects.
-- AI/SaaS-style applications, especially projects with API routes, paid capabilities, webhooks, or database writes.
+- **JavaScript/TypeScript**: Next.js, Express, Fastify
+- **Python**: FastAPI, Flask, Django
+- **Go**: Gin, Echo, Fiber
+- **Rust**: Actix, Axum, Rocket
+- **Java**: Spring Boot
+- **Kotlin**: Ktor
+- **Scala**: http4s, Akka
+- **C#**: ASP.NET
+- **PHP**: Laravel
+- **Ruby**: Rails, Sinatra
+- **Swift**: Vapor
+- **C/C++**, **Lua**, **Shell**, **Dart**, **Zig**: basic detection support
+
+Total: **18 languages, 21 frameworks**.
 - Local directories or public GitHub repositories.
 - Teams and independent builders who want an actionable hardening list before handoff.
 

@@ -172,13 +172,20 @@ demokiller inspect . --markdown
 
 Demo Killer 现在最适合检查这类项目：
 
-- Next.js App Router + TypeScript 项目。
-- Express / Fastify + TypeScript 项目，尤其是带 API route 的项目。
-- FastAPI / Flask / Django + Python 项目。
-- Gin / Echo / Fiber + Go 项目。
-- Actix / Axum + Rust 项目。
-- Spring Boot + Java 项目。
-- AI/SaaS 风格应用，尤其是带 API route、付费能力、Webhook、数据库写入的项目。
+- **JavaScript/TypeScript**：Next.js、Express、Fastify
+- **Python**：FastAPI、Flask、Django
+- **Go**：Gin、Echo、Fiber
+- **Rust**：Actix、Axum、Rocket
+- **Java**：Spring Boot
+- **Kotlin**：Ktor
+- **Scala**：http4s、Akka
+- **C#**：ASP.NET
+- **PHP**：Laravel
+- **Ruby**：Rails、Sinatra
+- **Swift**：Vapor
+- **C/C++**、**Lua**、**Shell**、**Dart**、**Zig**：基础检测支持
+
+总共 **18 种语言、21 个框架**。
 - 本地目录，或可以公开访问的 GitHub 仓库。
 - 希望在交付前拿到一份可执行 hardening list 的团队和独立开发者。
 
