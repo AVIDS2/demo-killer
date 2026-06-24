@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.4.1
+
+### Features
+
+- **5 Agent ecosystem rules**: DK-AGENT-001 through DK-AGENT-005 covering LLM code execution, MCP auth, tool rate limits, prompt injection, and context leaks.
+- **4 Project quality rules**: DK-TEST-001 (missing tests), DK-TYPES-001 (TS strict mode), DK-README-001 (missing docs), DK-PUBLISH-001 (npm files field).
+- **New inventory fields**: `hasTests`, `hasTypeScript`, `tsStrictMode`, `hasReadme`, `hasLicense`, `hasChangelog`, `isNpmPackage`, `npmFilesField`.
+- **Agent detection signals**: `evaluatesLlmOutput`, `mcpServer`, `agentTool`, `promptInjection`, `contextLeak` in source-inspector.
+
+### Fixes
+
+- LICENSE detection now works for files without extension (`LICENSE` not just `LICENSE.md`).
+- Project-level rules (tests, types, docs, publish) only fire for recognized stacks with actual code — no false positives on empty fixtures.
+- Prompt injection regex tightened to avoid false positive on standard `messages[].content` pattern.
+
+### Total: 31 rules (14 security + 5 agent + 12 quality)
+
 ## 0.4.0
 
 ### Breaking Changes

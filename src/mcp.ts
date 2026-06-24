@@ -81,7 +81,7 @@ export async function handleGenerateHardeningPlan(projectPath: string): Promise<
 export function createMcpServer(): McpServer {
   const server = new McpServer({
     name: "demokiller",
-    version: "0.4.0",
+    version: "0.4.1",
   });
 
   server.tool(

@@ -120,6 +120,58 @@ function detectCapabilitiesFromText(text: string, capabilities: string[]) {
   if (text.match(/\b(exec|execSync|spawn|child_process)\s*\(/) || text.match(/\bsubprocess\.(run|Popen|call)\s*\(/) || text.match(/\bos\.system\s*\(/)) {
     pushUnique(capabilities, "commandExecution");
   }
+
+  // ── Agent ecosystem ──────────────────────────────────────────────
+  // LLM output → code execution
+  if (
+    text.match(/\beval\s*\(\s*(response|result|completion|output|message|content|llm|ai|answer)/) ||
+    text.match(/\bnew\s+Function\s*\(\s*(response|result|completion|output|message|content)/) ||
+    text.match(/\bexec\s*\(\s*(response|result|completion|output|message|content)/) ||
+    text.match(/\bsubprocess\.\w+\s*\(\s*(response|result|completion|output)/) ||
+    text.match(/\bos\.system\s*\(\s*(response|result|completion|output)/)
+  ) {
+    pushUnique(capabilities, "evaluatesLlmOutput");
+  }
+
+  // MCP server patterns
+  if (
+    text.includes("McpServer") || text.includes("mcpServer") ||
+    text.includes("@modelcontextprotocol") || text.includes("mcp.createServer") ||
+    text.includes("server.tool(") || text.includes("StdioServerTransport")
+  ) {
+    pushUnique(capabilities, "mcpServer");
+  }
+
+  // Agent tool definitions
+  if (
+    text.match(/server\s*\.\s*tool\s*\(/) ||
+    text.match(/tool\s*\(\s*['"][\w-]+['"]/) ||
+    text.includes("function_tools") || text.includes("tools:") ||
+    text.match(/@\w+\.tool\s*\(/) || text.match(/@tool\s*\(/) ||
+    text.includes("ChatCompletionTool") || text.includes("FunctionDefinition")
+  ) {
+    pushUnique(capabilities, "agentTool");
+  }
+
+  // Prompt injection risk — user input in prompt
+  if (
+    text.match(/system.*?prompt.*?\$\{.*?(input|user)/i) ||
+    text.match(/f['"].*?\{.*?(input|user|message).*?\}.*prompt/i) ||
+    text.match(/prompt\s*=\s*.*?\+\s*.*?(input|user|message)/i) ||
+    text.match(/template\s*\(.*?(input|user|message).*?\)/i)
+  ) {
+    pushUnique(capabilities, "promptInjection");
+  }
+
+  // Context leak — system prompt or memory returned
+  if (
+    text.match(/return.*?(system.*?prompt|systemMessage|system_message)/i) ||
+    text.match(/response.*?(system.*?prompt|systemMessage)/i) ||
+    text.match(/json.*?(system.*?prompt|systemMessage)/i) ||
+    text.includes("systemPrompt") && text.match(/return|response|json/i)
+  ) {
+    pushUnique(capabilities, "contextLeak");
+  }
 }
 
 function detectControlsFromText(text: string, controls: string[]) {

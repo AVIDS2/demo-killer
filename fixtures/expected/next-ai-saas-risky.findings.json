@@ -1,22 +1,205 @@
 [
-  {"ruleId":"DK-AI-001","severity":"blocker","entryPoint":"app/api/chat/route.ts","missingControls":["auth","quota","rateLimit"],"asset":"paid AI API quota"},
-  {"ruleId":"DK-AUTH-001","severity":"blocker","entryPoint":"app/api/admin/users/route.ts","missingControls":["auth","authorization"],"asset":"user data"},
-  {"ruleId":"DK-WEBHOOK-001","severity":"blocker","entryPoint":"app/api/stripe/webhook/route.ts","missingControls":["signatureVerification","idempotency"],"asset":"payment state"},
-  {"ruleId":"DK-OBS-001","severity":"high","entryPoint":"app/api/admin/users/route.ts","missingControls":["logging"],"asset":"incident diagnosis"},
-  {"ruleId":"DK-DEBUG-001","severity":"high","entryPoint":"app/api/stripe/webhook/route.ts","missingControls":["debugGuard"],"asset":"operational hygiene"},
-  {"ruleId":"DK-INPUT-001","severity":"blocker","entryPoint":"app/api/admin/users/route.ts","missingControls":["inputValidation"],"asset":"application integrity"},
-  {"ruleId":"DK-INPUT-001","severity":"blocker","entryPoint":"app/api/chat/route.ts","missingControls":["inputValidation"],"asset":"application integrity"},
-  {"ruleId":"DK-INPUT-001","severity":"blocker","entryPoint":"app/api/stripe/webhook/route.ts","missingControls":["inputValidation"],"asset":"application integrity"},
-  {"ruleId":"DK-ERR-001","severity":"high","entryPoint":"app/api/admin/users/route.ts","missingControls":["errorHandling"],"asset":"application security"},
-  {"ruleId":"DK-ERR-001","severity":"high","entryPoint":"app/api/chat/route.ts","missingControls":["errorHandling"],"asset":"application security"},
-  {"ruleId":"DK-ERR-001","severity":"high","entryPoint":"app/api/stripe/webhook/route.ts","missingControls":["errorHandling"],"asset":"application security"},
-  {"ruleId":"DK-LOGI-001","severity":"medium","entryPoint":"app/api/stripe/webhook/route.ts","missingControls":["logSanitization"],"asset":"log integrity and observability"},
-  {"ruleId":"DK-CSP-001","severity":"medium","entryPoint":"app/api/admin/users/route.ts","missingControls":["securityHeaders"],"asset":"client-side security"},
-  {"ruleId":"DK-CSP-001","severity":"medium","entryPoint":"app/api/chat/route.ts","missingControls":["securityHeaders"],"asset":"client-side security"},
-  {"ruleId":"DK-CSP-001","severity":"medium","entryPoint":"app/api/stripe/webhook/route.ts","missingControls":["securityHeaders"],"asset":"client-side security"},
-  {"ruleId":"DK-HTTPS-001","severity":"high","entryPoint":"app/api/admin/users/route.ts","missingControls":["httpsEnforcement"],"asset":"transport security"},
-  {"ruleId":"DK-HTTPS-001","severity":"high","entryPoint":"app/api/chat/route.ts","missingControls":["httpsEnforcement"],"asset":"transport security"},
-  {"ruleId":"DK-HTTPS-001","severity":"high","entryPoint":"app/api/stripe/webhook/route.ts","missingControls":["httpsEnforcement"],"asset":"transport security"},
-  {"ruleId":"DK-ENV-001","severity":"high","missingControls":["envContract"],"asset":"production configuration"},
-  {"ruleId":"DK-DB-001","severity":"high","missingControls":["migration"],"asset":"database schema"}
+  {
+    "ruleId": "DK-AI-001",
+    "severity": "blocker",
+    "entryPoint": "app/api/chat/route.ts",
+    "missingControls": [
+      "auth",
+      "quota",
+      "rateLimit"
+    ],
+    "asset": "paid AI API quota"
+  },
+  {
+    "ruleId": "DK-AUTH-001",
+    "severity": "blocker",
+    "entryPoint": "app/api/admin/users/route.ts",
+    "missingControls": [
+      "auth",
+      "authorization"
+    ],
+    "asset": "user data"
+  },
+  {
+    "ruleId": "DK-WEBHOOK-001",
+    "severity": "blocker",
+    "entryPoint": "app/api/stripe/webhook/route.ts",
+    "missingControls": [
+      "signatureVerification",
+      "idempotency"
+    ],
+    "asset": "payment state"
+  },
+  {
+    "ruleId": "DK-OBS-001",
+    "severity": "high",
+    "entryPoint": "app/api/admin/users/route.ts",
+    "missingControls": [
+      "logging"
+    ],
+    "asset": "incident diagnosis"
+  },
+  {
+    "ruleId": "DK-DEBUG-001",
+    "severity": "high",
+    "entryPoint": "app/api/stripe/webhook/route.ts",
+    "missingControls": [
+      "debugGuard"
+    ],
+    "asset": "operational hygiene"
+  },
+  {
+    "ruleId": "DK-INPUT-001",
+    "severity": "blocker",
+    "entryPoint": "app/api/admin/users/route.ts",
+    "missingControls": [
+      "inputValidation"
+    ],
+    "asset": "application integrity"
+  },
+  {
+    "ruleId": "DK-INPUT-001",
+    "severity": "blocker",
+    "entryPoint": "app/api/chat/route.ts",
+    "missingControls": [
+      "inputValidation"
+    ],
+    "asset": "application integrity"
+  },
+  {
+    "ruleId": "DK-INPUT-001",
+    "severity": "blocker",
+    "entryPoint": "app/api/stripe/webhook/route.ts",
+    "missingControls": [
+      "inputValidation"
+    ],
+    "asset": "application integrity"
+  },
+  {
+    "ruleId": "DK-ERR-001",
+    "severity": "high",
+    "entryPoint": "app/api/admin/users/route.ts",
+    "missingControls": [
+      "errorHandling"
+    ],
+    "asset": "application security"
+  },
+  {
+    "ruleId": "DK-ERR-001",
+    "severity": "high",
+    "entryPoint": "app/api/chat/route.ts",
+    "missingControls": [
+      "errorHandling"
+    ],
+    "asset": "application security"
+  },
+  {
+    "ruleId": "DK-ERR-001",
+    "severity": "high",
+    "entryPoint": "app/api/stripe/webhook/route.ts",
+    "missingControls": [
+      "errorHandling"
+    ],
+    "asset": "application security"
+  },
+  {
+    "ruleId": "DK-LOGI-001",
+    "severity": "medium",
+    "entryPoint": "app/api/stripe/webhook/route.ts",
+    "missingControls": [
+      "logSanitization"
+    ],
+    "asset": "log integrity and observability"
+  },
+  {
+    "ruleId": "DK-CSP-001",
+    "severity": "medium",
+    "entryPoint": "app/api/admin/users/route.ts",
+    "missingControls": [
+      "securityHeaders"
+    ],
+    "asset": "client-side security"
+  },
+  {
+    "ruleId": "DK-CSP-001",
+    "severity": "medium",
+    "entryPoint": "app/api/chat/route.ts",
+    "missingControls": [
+      "securityHeaders"
+    ],
+    "asset": "client-side security"
+  },
+  {
+    "ruleId": "DK-CSP-001",
+    "severity": "medium",
+    "entryPoint": "app/api/stripe/webhook/route.ts",
+    "missingControls": [
+      "securityHeaders"
+    ],
+    "asset": "client-side security"
+  },
+  {
+    "ruleId": "DK-HTTPS-001",
+    "severity": "high",
+    "entryPoint": "app/api/admin/users/route.ts",
+    "missingControls": [
+      "httpsEnforcement"
+    ],
+    "asset": "transport security"
+  },
+  {
+    "ruleId": "DK-HTTPS-001",
+    "severity": "high",
+    "entryPoint": "app/api/chat/route.ts",
+    "missingControls": [
+      "httpsEnforcement"
+    ],
+    "asset": "transport security"
+  },
+  {
+    "ruleId": "DK-HTTPS-001",
+    "severity": "high",
+    "entryPoint": "app/api/stripe/webhook/route.ts",
+    "missingControls": [
+      "httpsEnforcement"
+    ],
+    "asset": "transport security"
+  },
+  {
+    "ruleId": "DK-ENV-001",
+    "severity": "high",
+    "missingControls": [
+      "envContract"
+    ],
+    "asset": "production configuration"
+  },
+  {
+    "ruleId": "DK-DB-001",
+    "severity": "high",
+    "missingControls": [
+      "migration"
+    ],
+    "asset": "database schema"
+  },
+  {
+    "ruleId": "DK-TEST-001",
+    "severity": "high",
+    "missingControls": [
+      "testCoverage"
+    ]
+  },
+  {
+    "ruleId": "DK-TYPES-001",
+    "severity": "medium",
+    "missingControls": [
+      "tsStrictMode"
+    ]
+  },
+  {
+    "ruleId": "DK-README-001",
+    "severity": "advisory",
+    "missingControls": [
+      "projectDocumentation"
+    ]
+  }
 ]

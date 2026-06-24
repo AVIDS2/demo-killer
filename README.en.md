@@ -194,28 +194,40 @@ Current rules focus on high-signal pre-launch risks:
 
 | Rule | Detects |
 | --- | --- |
-| `DK-AI-001` | Public paid AI capability without auth, quota, rate limiting, or abuse logging |
+| **Security Rules** | |
+| `DK-AI-001` | Public paid AI capability without auth, quota, rate limiting |
 | `DK-AUTH-001` | Admin/data mutation routes without authentication and authorization |
 | `DK-WEBHOOK-001` | Payment webhooks without signature verification and idempotency |
 | `DK-INPUT-001` | API routes consuming request body without schema validation |
 | `DK-ERR-001` | API routes without error handling that may leak internals |
 | `DK-DATA-001` | Database read results returned without field filtering |
 | `DK-CORS-001` | API routes allowing requests from any origin |
-| `DK-DEBUG-001` | Production routes containing console.log or debug statements |
 | `DK-SSRF-001` | HTTP requests with potentially user-controlled URLs |
 | `DK-CMDI-001` | Routes executing system commands (command injection risk) |
 | `DK-SECRET-001` | Hardcoded API keys or secrets in source code |
 | `DK-SQLI-001` | SQL queries built with string interpolation instead of parameterized statements |
 | `DK-PATH-001` | File system access using unsanitized user-controlled paths |
 | `DK-INSEC-001` | Unsafe deserialization or eval with user input |
-| `DK-CSP-001` | API responses missing CSP, X-Frame-Options, security headers |
 | `DK-HTTPS-001` | Missing HTTPS enforcement or HSTS header |
+| **Agent Ecosystem Rules** | |
+| `DK-AGENT-001` | LLM output passed to eval/exec (code execution) |
+| `DK-AGENT-002` | MCP server tools without authentication |
+| `DK-AGENT-003` | Agent tools without call frequency limits |
+| `DK-AGENT-004` | User input directly interpolated into prompts (injection risk) |
+| `DK-AGENT-005` | System prompt or memory leaked to users |
+| **Quality Rules** | |
+| `DK-DEBUG-001` | Production routes containing console.log or debug statements |
+| `DK-CSP-001` | API responses missing CSP, X-Frame-Options, security headers |
 | `DK-LOGI-001` | User-controlled input written directly to logs |
 | `DK-DEP-001` | Dependencies with known high/critical vulnerabilities |
 | `DK-DOCKER-001` | Dockerfile security issues (root user, :latest, debug ports) |
 | `DK-ENV-001` | Missing production environment contract |
 | `DK-DB-001` | Prisma schema without migration evidence |
 | `DK-OBS-001` | Critical mutation path without diagnostic logging |
+| `DK-TEST-001` | Project has no test files |
+| `DK-TYPES-001` | TypeScript project without strict mode |
+| `DK-README-001` | Project missing README or LICENSE |
+| `DK-PUBLISH-001` | npm package without `files` field (may publish sensitive files) |
 
 If Demo Killer cannot collect enough supported evidence, it returns `Insufficient Evidence` instead of dressing uncertainty up as a launch signal.
 

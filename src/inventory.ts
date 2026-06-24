@@ -21,6 +21,14 @@ export interface ProjectInventory {
   prismaSchemaPath?: string;
   migrationPaths: string[];
   hasDockerfile: boolean;
+  hasTests: boolean;
+  hasTypeScript: boolean;
+  tsStrictMode: boolean;
+  hasReadme: boolean;
+  hasLicense: boolean;
+  hasChangelog: boolean;
+  isNpmPackage: boolean;
+  npmFilesField: boolean;
   packageJson: {
     dependencies: Record<string, string>;
     devDependencies: Record<string, string>;
@@ -377,10 +385,24 @@ export async function buildInventory(root: string): Promise<ProjectInventory> {
   }
 
   // Read package.json for the inventory (even for non-JS projects, it might exist)
-  let packageJson: { dependencies?: DepMap; devDependencies?: DepMap } = { dependencies: {}, devDependencies: {} };
+  let packageJson: { name?: string; dependencies?: DepMap; devDependencies?: DepMap; files?: string[]; private?: boolean } = {};
   try {
     packageJson = JSON.parse(await fs.readFile(path.join(root, "package.json"), "utf8"));
   } catch { /* no package.json */ }
+
+  const lowerFiles = files.map(f => f.toLowerCase());
+  const hasTests = files.some(f =>
+    f.includes("__test") || f.includes(".test.") || f.includes(".spec.") ||
+    f.includes("tests/") || f.includes("test/") || f.includes("spec/") ||
+    f.endsWith("_test.go") || f.endsWith("_test.py") || f.endsWith("Test.java") || f.endsWith("Spec.scala")
+  );
+  const hasTypeScript = files.some(f => f.endsWith(".ts") || f.endsWith(".tsx") || f.endsWith(".mts"));
+  const tsStrictMode = await checkTsStrict(root);
+  const hasReadme = lowerFiles.some(f => f.startsWith("readme."));
+  const hasLicense = lowerFiles.some(f => f === "license" || f.startsWith("license.") || f === "licence" || f.startsWith("licence."));
+  const hasChangelog = lowerFiles.some(f => f.startsWith("changelog."));
+  const isNpmPackage = !!(packageJson.name && packageJson.private !== true);
+  const npmFilesField = Array.isArray(packageJson.files);
 
   return {
     root,
@@ -390,6 +412,24 @@ export async function buildInventory(root: string): Promise<ProjectInventory> {
     prismaSchemaPath: files.includes("prisma/schema.prisma") ? "prisma/schema.prisma" : undefined,
     migrationPaths: files.filter((f) => f.startsWith("prisma/migrations/") && f.endsWith(".sql")),
     hasDockerfile,
+    hasTests,
+    hasTypeScript,
+    tsStrictMode,
+    hasReadme,
+    hasLicense,
+    hasChangelog,
+    isNpmPackage,
+    npmFilesField,
     packageJson: { dependencies: packageJson.dependencies ?? {}, devDependencies: packageJson.devDependencies ?? {} },
   };
+}
+
+async function checkTsStrict(root: string): Promise<boolean> {
+  try {
+    const text = await fs.readFile(path.join(root, "tsconfig.json"), "utf8");
+    const config = JSON.parse(text);
+    return config.compilerOptions?.strict === true;
+  } catch {
+    return false;
+  }
 }

@@ -193,28 +193,40 @@ Demo Killer 现在最适合检查这类项目：
 
 | 规则 | 检查内容 |
 | --- | --- |
-| `DK-AI-001` | 公开 AI/付费能力是否缺少 auth、quota、rate limit、abuse logging |
+| **安全规则** | |
+| `DK-AI-001` | 公开 AI/付费能力是否缺少 auth、quota、rate limit |
 | `DK-AUTH-001` | 管理/数据 mutation 路由是否缺少认证和授权 |
 | `DK-WEBHOOK-001` | Stripe/payment webhook 是否缺少验签和幂等 |
 | `DK-INPUT-001` | API 路由是否直接消费请求 body 而无 schema 校验 |
 | `DK-ERR-001` | API 路由是否缺少错误处理，可能泄露内部信息 |
 | `DK-DATA-001` | 数据库查询结果是否可能未经字段过滤直接返回 |
 | `DK-CORS-001` | API 路由是否允许任意来源的跨域请求 |
-| `DK-DEBUG-001` | 生产路由是否包含 console.log 等调试语句 |
 | `DK-SSRF-001` | HTTP 请求是否使用了可能由用户控制的 URL |
 | `DK-CMDI-001` | 路由是否执行系统命令，可能存在命令注入风险 |
 | `DK-SECRET-001` | 源码中是否包含硬编码的 API 密钥或令牌 |
 | `DK-SQLI-001` | SQL 查询是否使用字符串拼接而非参数化语句 |
 | `DK-PATH-001` | 文件系统操作是否使用了未经消毒的用户路径 |
 | `DK-INSEC-001` | 是否使用了不安全的反序列化或 eval |
-| `DK-CSP-001` | API 响应是否缺少 CSP、X-Frame-Options 等安全头 |
 | `DK-HTTPS-001` | 是否未强制 HTTPS 或缺少 HSTS |
+| **Agent 生态规则** | |
+| `DK-AGENT-001` | LLM 输出是否直接传入 eval/exec（代码执行） |
+| `DK-AGENT-002` | MCP server tool 是否缺少认证 |
+| `DK-AGENT-003` | Agent tool 是否缺少调用频率限制 |
+| `DK-AGENT-004` | 用户输入是否直接拼入 prompt（注入风险） |
+| `DK-AGENT-005` | System prompt 或 memory 是否泄露给用户 |
+| **质量规则** | |
+| `DK-DEBUG-001` | 生产路由是否包含 console.log 等调试语句 |
+| `DK-CSP-001` | API 响应是否缺少 CSP、X-Frame-Options 等安全头 |
 | `DK-LOGI-001` | 用户输入是否可能直接写入日志（日志注入） |
-| `DK-DEP-001` | 依赖是否存在已知高危漏洞（npm audit / pip-audit） |
-| `DK-DOCKER-001` | Dockerfile 是否有安全问题（root 运行、latest tag、debug 端口） |
+| `DK-DEP-001` | 依赖是否存在已知高危漏洞 |
+| `DK-DOCKER-001` | Dockerfile 是否有安全问题 |
 | `DK-ENV-001` | 生产环境变量是否有明确 env contract |
 | `DK-DB-001` | Prisma schema 是否缺少 migration 证据 |
 | `DK-OBS-001` | 关键 mutation 路径是否缺少诊断日志 |
+| `DK-TEST-001` | 项目是否缺少测试文件 |
+| `DK-TYPES-001` | TypeScript 是否启用了 strict 模式 |
+| `DK-README-001` | 项目是否缺少 README 或 LICENSE |
+| `DK-PUBLISH-001` | npm 包是否缺少 `files` 字段（可能泄露敏感文件） |
 
 如果证据不足，报告会直接给出 `Insufficient Evidence`，避免把不确定性包装成“可以上线”。
 
