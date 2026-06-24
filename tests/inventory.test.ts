@@ -61,6 +61,37 @@ describe("buildInventory", () => {
     expect(inventory.apiRoutes.length).toBeGreaterThan(0);
   });
 
+  it("detects PHP Laravel projects and their route files", async () => {
+    const inventory = await buildInventory("fixtures/laravel-risky");
+
+    expect(inventory.stack).toBe("laravel");
+    expect(inventory.apiRoutes.length).toBeGreaterThan(0);
+  });
+
+  it("detects Ruby Rails projects and their route files", async () => {
+    const inventory = await buildInventory("fixtures/rails-risky");
+
+    expect(inventory.stack).toBe("rails");
+    expect(inventory.apiRoutes.length).toBeGreaterThan(0);
+  });
+
+  it("detects C# ASP.NET projects and their route files", async () => {
+    const inventory = await buildInventory("fixtures/aspnet-risky");
+
+    expect(inventory.stack).toBe("aspnet");
+    expect(inventory.apiRoutes.length).toBeGreaterThan(0);
+  });
+
+  it("detects project metadata fields", async () => {
+    const inventory = await buildInventory("fixtures/next-ai-saas-hardened");
+
+    expect(inventory.hasDockerfile).toBe(false);
+    expect(inventory.hasTypeScript).toBe(true);
+    expect(inventory.tsStrictMode).toBe(true);
+    expect(inventory.hasReadme).toBe(true);
+    expect(inventory.hasLicense).toBe(true);
+  });
+
   it("detects express stack even when no route files exist", async () => {
     const inventory = await buildInventory("fixtures/unsupported-empty-node");
 

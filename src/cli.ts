@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { analyzeFindings } from "./rules/index.js";
 import { buildInventory } from "./inventory.js";
+import { loadConfig, applyConfig } from "./config.js";
 import { loadBenchmarkManifest } from "./benchmark.js";
 import { initializeProject } from "./init.js";
 import { runBenchmarkSuite } from "./benchmark-runner.js";
@@ -57,8 +58,11 @@ async function runInspection(
 ): Promise<{ report: AnalysisReport; resolved: ResolvedRepository }> {
   const resolved = await dependencies.resolveRepository(input);
   const { findings, inventory } = await dependencies.analyzeFindings(resolved.root);
-  const hasEvidence = inventory.stack === "nextjs" && inventory.apiRoutes.length > 0;
-  const report = buildJsonReport(findings, new Date().toISOString(), {
+  const config = await loadConfig(resolved.root);
+  const filteredFindings = applyConfig(findings, config);
+  const supportedStacks = ["nextjs", "express", "fastify", "flask", "fastapi", "django", "gin", "echo", "fiber", "actix", "axum", "rocket", "spring-boot", "ktor", "laravel", "rails", "sinatra", "aspnet", "vapor", "http4s", "akka"];
+  const hasEvidence = supportedStacks.includes(inventory.stack) && inventory.apiRoutes.length > 0;
+  const report = buildJsonReport(filteredFindings, new Date().toISOString(), {
     hasSupportedProjectEvidence: hasEvidence,
   });
   return { report, resolved };

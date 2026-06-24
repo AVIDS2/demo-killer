@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.4.2
+
+### Features
+
+- **Config file support**: `.demokillerc.json` / `.demokiller.json` / `demokiller.config.json` for rule customization, exclude patterns, severity overrides, and CI thresholds.
+- **PHP/Laravel fixture**: Tests for Laravel route detection and OpenAI integration.
+- **Ruby/Rails fixture**: Tests for Rails controller detection and OpenAI integration.
+- **C#/ASP.NET fixture**: Tests for ASP.NET controller detection.
+- **New inventory fields**: `hasTests`, `hasTypeScript`, `tsStrictMode`, `hasReadme`, `hasLicense`, `hasChangelog`, `isNpmPackage`, `npmFilesField`.
+
+### Fixes
+
+- Rails controller files (`*_controller.rb`) now detected as route files.
+- ASP.NET `[ApiController]` and `[HttpPost(...)]` patterns detected.
+- Golden files regenerated from current build.
+
 ## 0.4.1
 
 ### Features
