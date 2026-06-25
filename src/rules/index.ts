@@ -1,5 +1,7 @@
 import { buildInventory, type ProjectInventory } from "../inventory.js";
 import { inspectRouteSource } from "../source-inspector.js";
+import { buildCallGraph } from "../call-graph.js";
+import { analyzeTaint, findAuthGaps } from "../taint-analysis.js";
 import type { Finding } from "../types.js";
 // Agent rules
 import { agentCodeExecRule } from "./agent-code-exec.js";
@@ -9,6 +11,7 @@ import { mcpServerAuthRule } from "./mcp-server-auth.js";
 import { promptInjectionRule } from "./prompt-injection.js";
 // Security rules
 import { adminMutationAuthRule } from "./admin-mutation-auth.js";
+import { authChainFindings } from "./auth-chain.js";
 import { commandInjectionRule } from "./command-injection.js";
 import { corsWildcardRule } from "./cors-wildcard.js";
 import { cspMissingRule } from "./csp-missing.js";
@@ -20,6 +23,7 @@ import { publicAiRouteRule } from "./public-ai-route.js";
 import { sensitiveDataRule } from "./sensitive-data.js";
 import { sqlInjectionRule } from "./sql-injection.js";
 import { ssrfRule } from "./ssrf.js";
+import { taintPathFindings } from "./taint-path.js";
 import { webhookSafetyRule } from "./webhook-safety.js";
 // Quality rules
 import { debugLeakRule } from "./debug-leak.js";
@@ -56,22 +60,27 @@ export async function analyzeFindings(root: string): Promise<AnalysisResult> {
   const usedEnvVars = Array.from(new Set(routeEvidence.flatMap((r) => r.envVars)));
   const declaredEnvVars = await readDeclaredEnvVars(root, inventory.envExamplePath);
 
+  // Phase 1: Call graph analysis
+  const callGraph = await buildCallGraph(root);
+  const taintPaths = analyzeTaint(callGraph);
+  const authGaps = findAuthGaps(callGraph, inventory.apiRoutes);
+
   const findings = [
-    // Original rules
+    // Pattern-based rules (original)
     ...routeEvidence.flatMap(publicAiRouteRule),
     ...routeEvidence.flatMap(adminMutationAuthRule),
     ...routeEvidence.flatMap(webhookSafetyRule),
     ...routeEvidence.flatMap(observabilityRule),
     ...routeEvidence.flatMap(corsWildcardRule),
     ...routeEvidence.flatMap(debugLeakRule),
-    // Security rules
+    // Pattern-based security rules
     ...routeEvidence.flatMap(ssrfRule),
     ...routeEvidence.flatMap(commandInjectionRule),
     ...routeEvidence.flatMap(hardcodedSecretRule),
     ...routeEvidence.flatMap(sqlInjectionRule),
     ...routeEvidence.flatMap(pathTraversalRule),
     ...routeEvidence.flatMap(insecureDeserializationRule),
-    // Quality rules
+    // Pattern-based quality rules
     ...routeEvidence.flatMap(inputValidationRule),
     ...routeEvidence.flatMap(errorLeakRule),
     ...routeEvidence.flatMap(logInjectionRule),
@@ -84,7 +93,10 @@ export async function analyzeFindings(root: string): Promise<AnalysisResult> {
     ...routeEvidence.flatMap(agentToolLimitRule),
     ...routeEvidence.flatMap(promptInjectionRule),
     ...routeEvidence.flatMap(contextLeakRule),
-    // Project rules
+    // Call graph analysis rules (cross-file, data flow)
+    ...taintPathFindings(taintPaths),
+    ...authChainFindings(authGaps),
+    // Project-level rules
     ...envContractRule(inventory, usedEnvVars, declaredEnvVars),
     ...migrationPostureRule(inventory),
     ...(await depsVulnerabilityFindings(inventory)),

@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.5.0
+
+### Architecture: Call Graph + Taint Analysis
+
+This release upgrades Demo Killer from pattern matching to program analysis.
+
+**New analysis engine:**
+- **Cross-file call graph** (`src/call-graph.ts`): Builds function call relationships across the entire project. Resolves imports, links call sites to function definitions, traces call chains.
+- **Taint analysis** (`src/taint-analysis.ts`): Tracks user input from sources (req.body, req.params) through function calls to dangerous sinks (eval, exec, SQL, HTTP). Identifies cross-function taint paths that single-file pattern matching cannot detect.
+- **Auth chain verification**: Verifies that authentication is present in the call chain, not just as a keyword in the file.
+
+**New rules (33 total):**
+- `DK-TAINT-001`: User input flows to dangerous sink (code exec, SQL, command) through call chain
+- `DK-AUTHCHAIN-001`: Route handler has no authentication in its call chain (verified by cross-file analysis)
+
+**What this means:**
+- Before: "This file contains eval() → finding"
+- After: "User input from req.body reaches eval() through ChatService.process() → finding"
+
 ## 0.4.2
 
 ### Features
