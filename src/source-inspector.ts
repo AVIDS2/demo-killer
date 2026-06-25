@@ -120,6 +120,13 @@ function detectCapabilitiesFromText(text: string, capabilities: string[]) {
   if (text.match(/\b(exec|execSync|spawn|child_process)\s*\(/) || text.match(/\bsubprocess\.(run|Popen|call)\s*\(/) || text.match(/\bos\.system\s*\(/)) {
     pushUnique(capabilities, "commandExecution");
   }
+  // N+1 query: database call inside a loop
+  if (
+    text.match(/\b(for\s*\(|while\s*\(|\.forEach\s*\(|\.map\s*\(|for\s+\w+\s+in)/) &&
+    (text.match(/prisma\.\w+\.(find|delete|update|create|upsert)/i) || text.match(/\.(query|execute|raw)\s*\(/))
+  ) {
+    pushUnique(capabilities, "nPlusOneRisk");
+  }
 
   // N+1 query detection: DB call inside a loop
   if (
@@ -278,16 +285,7 @@ function detectControlsFromText(text: string, controls: string[]) {
     pushUnique(controls, "connectionPooling");
   }
 
-  // N+1 query detection — DB call inside for/while/forEach/map
-  if (
-    text.match(/\b(for\s*\(|while\s*\(|\.forEach\s*\(|\.map\s*\(|for\s+\w+\s+in)/) &&
-    text.match(/prisma\.\w+\.(find|delete|update|create|upsert)/i) ||
-    (text.match(/\b(for\s*\(|while\s*\(|\.forEach\s*\(|\.map\s*\(|for\s+\w+\s+in)/) && text.match(/\.(query|execute|raw)\s*\(/))
-  ) {
-    pushUnique(capabilities, "nPlusOneRisk");
-  }
-
-  // PII exposure detection — return statement with PII-like fields
+  // PII exposure
   if (
     text.match(/return.*\b(email|phone|ssn|social_security|credit_card|passport|address|dob|date_of_birth)\b/) ||
     text.match(/\.json\s*\(\s*\{\s*[^}]*\b(email|password|secret|token|ssn)\b/) ||
