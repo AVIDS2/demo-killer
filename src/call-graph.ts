@@ -301,11 +301,9 @@ export function findCallees(graph: CallGraph, callerName: string): CallSite[] {
 }
 
 export function resolveCallee(graph: CallGraph, call: CallSite): FuncDef | undefined {
-  // Direct match: function defined in same file
   const sameFile = `${call.file}:${call.callee}`;
   if (graph.functions.has(sameFile)) return graph.functions.get(sameFile);
 
-  // Import resolution: find which file exports this name
   const importMatch = graph.imports.find(
     i => i.file === call.file && i.imported === call.callee && i.resolved
   );
@@ -314,7 +312,6 @@ export function resolveCallee(graph: CallGraph, call: CallSite): FuncDef | undef
     if (graph.functions.has(resolved)) return graph.functions.get(resolved);
   }
 
-  // Method call: resolve the object (e.g., prisma.user.delete → look for prisma import)
   if (call.callee.includes(".")) {
     const objName = call.callee.split(".")[0];
     const objImport = graph.imports.find(
@@ -326,6 +323,107 @@ export function resolveCallee(graph: CallGraph, call: CallSite): FuncDef | undef
   }
 
   return undefined;
+}
+
+// ─── Entry point analysis ───────────────────────────────────────
+
+export interface EntryPoint {
+  func: FuncDef;
+  qualified: string;
+  kind: "route-handler" | "controller" | "middleware" | "worker" | "unknown";
+}
+
+export function identifyEntryPoints(graph: CallGraph, routeFiles: string[]): EntryPoint[] {
+  const entries: EntryPoint[] = [];
+  const routeFileSet = new Set(routeFiles);
+
+  for (const [qualified, func] of graph.functions) {
+    const file = func.file;
+    const name = func.name.toLowerCase();
+
+    // Route file functions are entry points
+    if (routeFileSet.has(file)) {
+      const kind = name.includes("handler") || name.includes("controller") || name.includes("route")
+        ? "route-handler"
+        : name.includes("middleware") ? "middleware"
+        : name.includes("worker") || name.includes("job") ? "worker"
+        : "route-handler"; // default for route files
+      entries.push({ func, qualified, kind });
+      continue;
+    }
+
+    // Controller files
+    if (file.includes("controller") || file.includes("handler")) {
+      entries.push({ func, qualified, kind: "controller" });
+      continue;
+    }
+
+    // Exported functions in route-like files
+    if (file.includes("routes/") || file.includes("api/")) {
+      entries.push({ func, qualified, kind: "route-handler" });
+    }
+  }
+
+  return entries;
+}
+
+export function traceFromEntryPoint(
+  graph: CallGraph,
+  entry: EntryPoint,
+  maxDepth = 5,
+): { callees: CallSite[]; depth: number }[] {
+  const visited = new Set<string>();
+  const result: { callees: CallSite[]; depth: number }[] = [];
+
+  function walk(qualified: string, depth: number) {
+    if (depth > maxDepth) return;
+    if (visited.has(qualified)) return;
+    visited.add(qualified);
+
+    const callees = findCallees(graph, qualified.split(":")[1] || qualified);
+    if (callees.length > 0) {
+      result.push({ callees, depth });
+      for (const call of callees) {
+        const resolved = resolveCallee(graph, call);
+        if (resolved) {
+          walk(`${resolved.file}:${resolved.name}`, depth + 1);
+        }
+      }
+    }
+  }
+
+  walk(entry.qualified, 0);
+  return result;
+}
+
+// ─── Reachability analysis ──────────────────────────────────────
+
+export function isReachableFrom(
+  graph: CallGraph,
+  targetFunc: string,
+  fromEntry: string,
+  maxDepth = 5,
+): boolean {
+  const visited = new Set<string>();
+
+  function walk(current: string, depth: number): boolean {
+    if (depth > maxDepth) return false;
+    if (visited.has(current)) return false;
+    visited.add(current);
+
+    if (current === targetFunc) return true;
+
+    const callees = findCallees(graph, current.split(":")[1] || current);
+    for (const call of callees) {
+      const resolved = resolveCallee(graph, call);
+      if (resolved && walk(`${resolved.file}:${resolved.name}`, depth + 1)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  return walk(fromEntry, 0);
 }
 
 export function traceCallChain(graph: CallGraph, startFile: string, startFunc: string, maxDepth = 5): string[][] {

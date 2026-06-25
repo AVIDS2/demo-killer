@@ -258,6 +258,25 @@ function detectControlsFromText(text: string, controls: string[]) {
   if (text.includes("structuredLog") || text.includes("JSON.stringify") || text.match(/log\.\w+\s*\([^)]*\{/) || text.match(/logger\.\w+\s*\([^)]*\{/) || text.match(/auditLog\s*\([^)]*\{/)) {
     pushUnique(controls, "logSanitization");
   }
+
+  // Timeout handling
+  if (
+    text.includes("AbortController") || text.includes("AbortSignal") ||
+    text.match(/timeout\s*[:=]\s*\d/) || text.includes("setTimeout") ||
+    text.match(/\.timeout\s*\(/) || text.includes("signal:") ||
+    text.includes("request_timeout") || text.includes("connect_timeout")
+  ) {
+    pushUnique(controls, "timeoutHandling");
+  }
+
+  // Connection pooling
+  if (
+    text.includes("connectionLimit") || text.includes("pool") ||
+    text.includes("max_connections") || text.includes("poolSize") ||
+    text.includes("pool_size") || text.match(/pool\s*[:=]\s*\d/)
+  ) {
+    pushUnique(controls, "connectionPooling");
+  }
 }
 
 function extractEnvVars(text: string): string[] {

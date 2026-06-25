@@ -8,6 +8,7 @@ import { runBenchmarkSuite } from "./benchmark-runner.js";
 import { buildJsonReport } from "./report/json.js";
 import { renderBenchmarkMarkdown } from "./report/benchmark-markdown.js";
 import { renderMarkdownReport } from "./report/markdown.js";
+import { renderColoredReport } from "./report/colored.js";
 import { resolveRepository } from "./repository.js";
 import { diffSnapshots } from "./state.js";
 import path from "node:path";
@@ -189,7 +190,8 @@ export async function runCli(
         // snapshot save is best-effort
       }
 
-      const stdout = wantsJson ? JSON.stringify(report, null, 2) : renderMarkdownReport(report);
+      const wantsMarkdown = argv.includes("--markdown");
+      const stdout = wantsJson ? JSON.stringify(report, null, 2) : wantsMarkdown ? renderMarkdownReport(report) : renderColoredReport(report);
       await resolved.cleanup?.();
       return { exitCode: 0, stdout, stderr: "" };
     } catch (error) {

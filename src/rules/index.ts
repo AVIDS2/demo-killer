@@ -13,6 +13,7 @@ import { promptInjectionRule } from "./prompt-injection.js";
 import { adminMutationAuthRule } from "./admin-mutation-auth.js";
 import { authChainFindings } from "./auth-chain.js";
 import { commandInjectionRule } from "./command-injection.js";
+import { connectionPoolingRule } from "./connection-pooling.js";
 import { corsWildcardRule } from "./cors-wildcard.js";
 import { cspMissingRule } from "./csp-missing.js";
 import { hardcodedSecretRule } from "./hardcoded-secret.js";
@@ -20,6 +21,7 @@ import { httpsEnforcementRule } from "./https-enforcement.js";
 import { insecureDeserializationRule } from "./insecure-deserialization.js";
 import { pathTraversalRule } from "./path-traversal.js";
 import { publicAiRouteRule } from "./public-ai-route.js";
+import { requestTimeoutRule } from "./request-timeout.js";
 import { sensitiveDataRule } from "./sensitive-data.js";
 import { sqlInjectionRule } from "./sql-injection.js";
 import { ssrfRule } from "./ssrf.js";
@@ -93,6 +95,8 @@ export async function analyzeFindings(root: string): Promise<AnalysisResult> {
     ...routeEvidence.flatMap(httpsEnforcementRule),
     ...routeEvidence.flatMap(nPlusOneRule),
     ...routeEvidence.flatMap(piiExposureRule),
+    ...routeEvidence.flatMap(requestTimeoutRule),
+    ...routeEvidence.flatMap(connectionPoolingRule),
     // Agent rules
     ...routeEvidence.flatMap(agentCodeExecRule),
     ...routeEvidence.flatMap(mcpServerAuthRule),
