@@ -191,6 +191,61 @@ export async function runCli(
         // snapshot save is best-effort
       }
 
+      const wantsWatch = argv.includes("--watch");
+
+      // Watch mode: loop and re-inspect on file changes
+      if (wantsWatch) {
+        const dim = "\x1b[2m", red = "\x1b[31m", green = "\x1b[32m", reset = "\x1b[0m";
+        process.stdout.write(renderColoredReport(report));
+        process.stdout.write("\n" + dim + "  Watching for changes... (Ctrl+C to stop)" + reset + "\n");
+        await resolved.cleanup?.();
+
+        const { watch } = await import("node:fs");
+        let lastFindingsCount = report.findings.length;
+        let lastBlockers = report.findings.filter(f => f.severity === "blocker").length;
+
+        // Polling-based watch (works cross-platform)
+        let timer: ReturnType<typeof setInterval>;
+        await new Promise<void>((_resolve) => {
+          timer = setInterval(async () => {
+            try {
+              const reResolved = await dependencies.resolveRepository(input);
+              try {
+                const reResult = await dependencies.analyzeFindings(reResolved.root);
+                const cfg = await loadConfig(reResolved.root);
+                const filtered = applyConfig(reResult.findings, cfg);
+                const stacks = ["nextjs", "express", "fastify", "flask", "fastapi", "django", "gin", "echo", "fiber", "actix", "axum", "rocket", "spring-boot", "ktor", "laravel", "rails", "sinatra", "aspnet", "vapor", "http4s", "akka"];
+                const hasEv = stacks.includes(reResult.inventory.stack) && reResult.inventory.apiRoutes.length > 0;
+                const newReport = buildJsonReport(filtered, new Date().toISOString(), { hasSupportedProjectEvidence: hasEv });
+                const newBlockers = newReport.findings.filter(f => f.severity === "blocker").length;
+
+                if (newReport.findings.length !== lastFindingsCount || newBlockers !== lastBlockers) {
+                  // Clear screen
+                  process.stdout.write("\x1b[2J\x1b[H");
+                  process.stdout.write(renderColoredReport(newReport));
+                  const delta = newReport.findings.length - lastFindingsCount;
+                  const blockerDelta = newBlockers - lastBlockers;
+                  if (delta !== 0) {
+                    process.stdout.write(`${delta > 0 ? red : green}  ${delta > 0 ? "+" : ""}${delta} findings${reset}\n`);
+                  }
+                  if (blockerDelta !== 0) {
+                    process.stdout.write(`${blockerDelta > 0 ? red : green}  ${blockerDelta > 0 ? "+" : ""}${blockerDelta} blockers${reset}\n`);
+                  }
+                  process.stdout.write("\n" + dim + "  Watching for changes... (Ctrl+C to stop)" + reset + "\n");
+                  lastFindingsCount = newReport.findings.length;
+                  lastBlockers = newBlockers;
+                }
+              } finally {
+                await reResolved.cleanup?.();
+              }
+            } catch { /* ignore re-inspection errors */ }
+          }, 3000);
+        });
+
+        clearInterval(timer!);
+        return { exitCode: 0, stdout: "", stderr: "" };
+      }
+
       const wantsMarkdown = argv.includes("--markdown");
       const wantsHtml = argv.includes("--html");
       const stdout = wantsJson ? JSON.stringify(report, null, 2) : wantsHtml ? renderHtmlReport(report) : wantsMarkdown ? renderMarkdownReport(report) : renderColoredReport(report);

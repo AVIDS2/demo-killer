@@ -208,7 +208,8 @@ function detectControlsFromText(text: string, controls: string[]) {
   if (text.includes("@login_required") || text.includes("Depends(get_current_user") || text.includes("jwt.decode") || text.includes("HTTPBearer") || text.includes("get_current_user")) {
     pushUnique(controls, "auth");
   }
-  if (text.includes("middleware.Auth") || text.includes("JWT") || text.includes("session.Get(")) {
+  // Go: Gin middleware auth, context values
+  if (text.includes("middleware.Auth") || text.includes("JWT") || text.includes("session.Get(") || text.match(/c\.Set\s*\(\s*["']user["']/) || text.match(/middleware\.BasicAuth\s*\(/)) {
     pushUnique(controls, "auth");
   }
   if (text.includes("@PreAuthorize") || text.includes("@Secured") || text.includes("SecurityContext") || text.includes("@AuthenticationPrincipal")) {
@@ -271,7 +272,8 @@ function detectControlsFromText(text: string, controls: string[]) {
     text.includes("AbortController") || text.includes("AbortSignal") ||
     text.match(/timeout\s*[:=]\s*\d/) || text.includes("setTimeout") ||
     text.match(/\.timeout\s*\(/) || text.includes("signal:") ||
-    text.includes("request_timeout") || text.includes("connect_timeout")
+    text.includes("request_timeout") || text.includes("connect_timeout") ||
+    text.includes("context.WithTimeout") // Go context timeout
   ) {
     pushUnique(controls, "timeoutHandling");
   }
