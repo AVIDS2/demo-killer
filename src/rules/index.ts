@@ -47,7 +47,7 @@ import { missingDocsRule } from "./missing-docs.js";
 import { missingTestsRule } from "./missing-tests.js";
 import { npmPublishRule } from "./npm-publish.js";
 import { tsStrictRule } from "./ts-strict.js";
-import { cliEntryPointFindings } from "./universal-project.js";
+import { projectTypeFindings } from "./universal-project.js";
 
 async function readDeclaredEnvVars(root: string, envExamplePath?: string): Promise<string[]> {
   if (!envExamplePath) return [];
@@ -121,7 +121,7 @@ export async function analyzeFindings(root: string): Promise<AnalysisResult> {
     ...tsStrictRule(inventory),
     ...missingDocsRule(inventory),
     ...npmPublishRule(inventory),
-    ...cliEntryPointFindings(inventory),
+    ...projectTypeFindings(inventory),
     ...gracefulShutdownRule(inventory),
     ...healthCheckRule(inventory),
   ];

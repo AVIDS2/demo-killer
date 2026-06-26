@@ -1,5 +1,6 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import { detectProjectKind, type ProjectKind } from "./project-kind.js";
 
 export type StackType =
   | "nextjs" | "express" | "fastify"
@@ -16,6 +17,7 @@ export type StackType =
 export interface ProjectInventory {
   root: string;
   stack: StackType;
+  projectKind: ProjectKind;
   apiRoutes: string[];
   envExamplePath?: string;
   prismaSchemaPath?: string;
@@ -447,6 +449,8 @@ export async function buildInventory(root: string): Promise<ProjectInventory> {
   const hasChangelog = lowerFiles.some(f => f.startsWith("changelog."));
   const isNpmPackage = !!(packageJson.name && packageJson.private !== true);
   const npmFilesField = Array.isArray(packageJson.files);
+  const allDeps = { ...(packageJson.dependencies ?? {}), ...(packageJson.devDependencies ?? {}) };
+  const projectKind = detected.stack === "unknown" ? detectProjectKind(allDeps, files) : "web-app";
 
   return {
     root,
@@ -464,6 +468,7 @@ export async function buildInventory(root: string): Promise<ProjectInventory> {
     hasChangelog,
     isNpmPackage,
     npmFilesField,
+    projectKind,
     packageJson: { dependencies: packageJson.dependencies ?? {}, devDependencies: packageJson.devDependencies ?? {} },
   };
 }

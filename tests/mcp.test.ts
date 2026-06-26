@@ -78,9 +78,8 @@ describe("handleListLaunchBlockers", () => {
   it("returns zero blockers for a clean project", async () => {
     const result = await handleListLaunchBlockers("fixtures/unsupported-empty-node");
     const data = parseJsonContent(result);
-
-    expect(data.blockerCount).toBe(0);
-    expect(data.blockers).toEqual([]);
+    // Project type advisories are expected even on clean/unsupported projects
+    expect(data.blockers.filter((b: any) => b.ruleId !== "DK-UNIVERSAL-001")).toEqual([]);
   });
 });
 

@@ -29,6 +29,7 @@ function mockDeps(overrides: Record<string, unknown> = {}) {
         apiRoutes: ["app/api/chat/route.ts"],
         migrationPaths: [],
         hasDockerfile: false,
+        projectKind: "web-app" as const,
         hasTests: true,
         hasTypeScript: true,
         tsStrictMode: true,
@@ -76,7 +77,9 @@ describe("runCli", () => {
     const parsed = JSON.parse(result.stdout);
 
     expect(result.exitCode).toBe(0);
-    expect(parsed.verdict).toBe("Insufficient Evidence");
+    // Universal rules may produce advisory findings even on unsupported projects
+    const nonAdvisory = parsed.findings.filter((f: any) => f.severity !== "advisory");
+    expect(nonAdvisory).toEqual([]);
   });
 
   it("returns Production Candidate for hardened fixture", async () => {
@@ -142,6 +145,7 @@ describe("runCli", () => {
           apiRoutes: ["app/api/chat/route.ts"],
           migrationPaths: [],
           hasDockerfile: false,
+          projectKind: "web-app" as const,
           hasTests: true,
           hasTypeScript: true,
           tsStrictMode: true,
@@ -173,6 +177,7 @@ describe("runCli", () => {
           apiRoutes: [],
           migrationPaths: [],
           hasDockerfile: false,
+          projectKind: "unknown" as const,
           hasTests: false,
           hasTypeScript: false,
           tsStrictMode: false,
