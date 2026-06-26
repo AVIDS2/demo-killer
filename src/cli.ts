@@ -13,6 +13,13 @@ import { renderHtmlReport } from "./report/html.js";
 import { resolveRepository } from "./repository.js";
 import { diffSnapshots } from "./state.js";
 import path from "node:path";
+
+const SUPPORTED_STACKS = [
+  "nextjs", "express", "fastify", "flask", "fastapi", "django",
+  "gin", "echo", "fiber", "actix", "axum", "rocket",
+  "spring-boot", "ktor", "laravel", "rails", "sinatra",
+  "aspnet", "vapor", "http4s", "akka",
+];
 import { pathToFileURL } from "node:url";
 import type { AnalysisReport, Finding } from "./types.js";
 import type { ResolvedRepository } from "./repository.js";
@@ -35,13 +42,7 @@ const defaultDependencies: CliDependencies = {
   analyzeFindings,
   hasSupportedProjectEvidence: async (root) => {
     const inventory = await buildInventory(root);
-    const supportedStacks = [
-      "nextjs", "express", "fastify", "flask", "fastapi", "django",
-      "gin", "echo", "fiber", "actix", "axum", "rocket",
-      "spring-boot", "ktor", "laravel", "rails", "sinatra",
-      "aspnet", "vapor", "http4s", "akka",
-    ];
-    return supportedStacks.includes(inventory.stack) && inventory.apiRoutes.length > 0;
+    return SUPPORTED_STACKS.includes(inventory.stack) && inventory.apiRoutes.length > 0;
   },
 };
 
@@ -62,8 +63,7 @@ async function runInspection(
   const { findings, inventory } = await dependencies.analyzeFindings(resolved.root);
   const config = await loadConfig(resolved.root);
   const filteredFindings = applyConfig(findings, config);
-  const supportedStacks = ["nextjs", "express", "fastify", "flask", "fastapi", "django", "gin", "echo", "fiber", "actix", "axum", "rocket", "spring-boot", "ktor", "laravel", "rails", "sinatra", "aspnet", "vapor", "http4s", "akka"];
-  const hasEvidence = supportedStacks.includes(inventory.stack) && inventory.apiRoutes.length > 0;
+  const hasEvidence = SUPPORTED_STACKS.includes(inventory.stack) && inventory.apiRoutes.length > 0;
   const report = buildJsonReport(filteredFindings, new Date().toISOString(), {
     hasSupportedProjectEvidence: hasEvidence,
   });

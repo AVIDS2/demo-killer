@@ -1,52 +1,8 @@
 import type { Finding } from "../types.js";
 import type { ProjectInventory } from "../inventory.js";
+import type { ProjectKind } from "../project-kind.js";
 
-// ─── Project type detection ─────────────────────────────────────
-
-export type ProjectKind =
-  | "web-app" | "cli-tool" | "library-sdk" | "desktop-app" | "mobile-app"
-  | "game" | "ml-pipeline" | "iac" | "browser-extension" | "ide-plugin"
-  | "cicd-pipeline" | "migration-tool" | "mq-worker" | "api-gateway"
-  | "cron-job" | "wasm-module" | "blockchain" | "iot-embedded"
-  | "devops-script" | "serverless-func" | "static-site" | "cms"
-  | "monitoring-tool" | "auth-service" | "payment-system"
-  | "unknown";
-
-export function detectProjectKind(inventory: ProjectInventory, files: string[]): ProjectKind {
-  const deps = inventory.packageJson?.dependencies ?? {};
-  const devDeps = inventory.packageJson?.devDependencies ?? {};
-  const allDeps = { ...deps, ...devDeps };
-  const depNames = Object.keys(allDeps);
-  const fileStr = files.join(" ").toLowerCase();
-
-  if (depNames.some(d => d.includes("next") || d.includes("react") || d.includes("vue") || d.includes("svelte") || d.includes("express") || d.includes("fastify") || d.includes("flask") || d.includes("django") || d.includes("gin") || d.includes("actix"))) return "web-app";
-  if (depNames.some(d => d.includes("electron") || d.includes("tauri") || d.includes("wpf") || d.includes("swiftui"))) return "desktop-app";
-  if (depNames.some(d => d.includes("react-native") || d.includes("flutter") || d.includes("swift") || d.includes("kotlin") || d.includes("capacitor"))) return "mobile-app";
-  if (depNames.some(d => d.includes("unity") || d.includes("unreal") || d.includes("godot") || d.includes("phaser") || d.includes("pixi"))) return "game";
-  if (depNames.some(d => d.includes("tensorflow") || d.includes("pytorch") || d.includes("scikit") || d.includes("pandas") || d.includes("airflow") || d.includes("spark"))) return "ml-pipeline";
-  if (depNames.some(d => d.includes("terraform") || d.includes("pulumi") || d.includes("cdk") || d.includes("ansible"))) return "iac";
-  if (depNames.some(d => d.includes("webextension") || d.includes("chrome-extension") || d.includes("browser-ext"))) return "browser-extension";
-  if (depNames.some(d => d.includes("puppeteer") || d.includes("playwright") || d.includes("cypress") || d.includes("selenium"))) return "cicd-pipeline";
-  if (depNames.some(d => d.includes("prisma") || d.includes("typeorm") || d.includes("knex") || d.includes("alembic") || d.includes("flyway"))) return "migration-tool";
-  if (depNames.some(d => d.includes("kafka") || d.includes("rabbitmq") || d.includes("amqp") || d.includes("bull") || d.includes("sqs"))) return "mq-worker";
-  if (depNames.some(d => d.includes("nginx") || d.includes("kong") || d.includes("traefik") || d.includes("envoy"))) return "api-gateway";
-  if (depNames.some(d => d.includes("cron") || d.includes("schedule") || d.includes("node-cron") || d.includes("celery"))) return "cron-job";
-  if (depNames.some(d => d.includes("wasm") || d.includes("wasm-pack") || d.includes("wasm-bindgen"))) return "wasm-module";
-  if (depNames.some(d => d.includes("web3") || d.includes("ethers") || d.includes("solana") || d.includes("hardhat") || d.includes("truffle"))) return "blockchain";
-  if (depNames.some(d => d.includes("raspberry") || d.includes("arduino") || d.includes("esp") || d.includes("mqtt"))) return "iot-embedded";
-  if (depNames.some(d => d.includes("serverless") || d.includes("aws-lambda") || d.includes("@azure/functions") || d.includes("@google-cloud/functions"))) return "serverless-func";
-  if (depNames.some(d => d.includes("gatsby") || d.includes("hugo") || d.includes("jekyll") || d.includes("astro") || d.includes("11ty"))) return "static-site";
-  if (depNames.some(d => d.includes("strapi") || d.includes("contentful") || d.includes("sanity") || d.includes("wordpress"))) return "cms";
-  if (depNames.some(d => d.includes("prometheus") || d.includes("grafana") || d.includes("datadog") || d.includes("newrelic") || d.includes("sentry"))) return "monitoring-tool";
-  if (depNames.some(d => d.includes("passport") || d.includes("oauth") || d.includes("keycloak") || d.includes("auth0") || d.includes("clerk"))) return "auth-service";
-  if (depNames.some(d => d.includes("stripe") || d.includes("paypal") || d.includes("square") || d.includes("adyen"))) return "payment-system";
-
-  // Default detection by file patterns
-  if (fileStr.includes("bin/") || fileStr.includes("cli") || fileStr.includes("command")) return "cli-tool";
-  if (fileStr.includes("index.ts") || fileStr.includes("index.js") || fileStr.includes("lib/") || fileStr.includes("src/")) return "library-sdk";
-
-  return "unknown";
-}
+export type { ProjectKind };
 
 // ─── Production readiness concerns per project type ─────────────
 
@@ -85,8 +41,7 @@ export function projectTypeFindings(inventory: ProjectInventory): Finding[] {
   const kind = inventory.projectKind || "unknown";
   const concerns = PROJECT_CONCERNS[kind] || PROJECT_CONCERNS.unknown;
   const findings: Finding[] = [];
-  // For recognized stacks with API routes, web-level checks already cover detailed concerns
-  // For projects without any API routes, this is purely informational
+  // DK-UNIVERSAL-001 is purely informational — deep rules handle actual detection
   const effectiveSeverity = "advisory";
 
   // Main project type advisory

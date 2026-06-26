@@ -39,13 +39,18 @@ import { nPlusOneRule } from "./n-plus-one.js";
 import { observabilityRule } from "./observability.js";
 import { piiExposureRule } from "./pii-exposure.js";
 // Project rules
+import { cliToolFindings } from "./cli-tool.js";
 import { depsVulnerabilityFindings } from "./deps-vulnerability.js";
 import { dockerSecurityFindings } from "./docker-security.js";
 import { envContractRule } from "./env-contract.js";
+import { librarySdkFindings } from "./library-sdk.js";
 import { migrationPostureRule } from "./migration-posture.js";
 import { missingDocsRule } from "./missing-docs.js";
 import { missingTestsRule } from "./missing-tests.js";
+import { mqWorkerFindings } from "./mq-worker.js";
 import { npmPublishRule } from "./npm-publish.js";
+import { iacFindings } from "./iac.js";
+import { paymentSystemFindings, authServiceFindings } from "./payment-auth.js";
 import { tsStrictRule } from "./ts-strict.js";
 import { projectTypeFindings } from "./universal-project.js";
 
@@ -54,7 +59,7 @@ async function readDeclaredEnvVars(root: string, envExamplePath?: string): Promi
   const { promises: fs } = await import("node:fs");
   const path = await import("node:path");
   const text = await fs.readFile(path.join(root, envExamplePath), "utf8");
-  return text.split(/\r?\n/).map((l) => l.trim()).filter((l) => l.length > 0 && !l.startsWith("#")).map((l) => l.split("=", 1)[0]).filter((n) => n.length > 0);
+  return text.split(/\r?\n/).map((l) => l.trim()).filter((l) => l.length > 0 && !l.startsWith("#")).map((l) => l.replace(/^export\s+/, "").split("=", 1)[0]).filter((n) => n.length > 0);
 }
 
 export interface AnalysisResult {
@@ -121,9 +126,15 @@ export async function analyzeFindings(root: string): Promise<AnalysisResult> {
     ...tsStrictRule(inventory),
     ...missingDocsRule(inventory),
     ...npmPublishRule(inventory),
+    ...(await librarySdkFindings(root, inventory)),
+    ...(await cliToolFindings(inventory)),
+    ...(await mqWorkerFindings(root, inventory)),
+    ...(await iacFindings(root, inventory)),
+    ...(await paymentSystemFindings(root, inventory)),
+    ...(await authServiceFindings(root, inventory)),
     ...projectTypeFindings(inventory),
-    ...gracefulShutdownRule(inventory),
-    ...healthCheckRule(inventory),
+    ...(await gracefulShutdownRule(inventory)),
+    ...(await healthCheckRule(inventory)),
   ];
 
   return { findings, inventory };

@@ -173,9 +173,10 @@ function detectCapabilitiesFromText(text: string, capabilities: string[]) {
   if (
     text.match(/server\s*\.\s*tool\s*\(/) ||
     text.match(/tool\s*\(\s*['"][\w-]+['"]/) ||
-    text.includes("function_tools") || text.includes("tools:") ||
+    text.includes("function_tools") ||
     text.match(/@\w+\.tool\s*\(/) || text.match(/@tool\s*\(/) ||
-    text.includes("ChatCompletionTool") || text.includes("FunctionDefinition")
+    text.includes("ChatCompletionTool") ||
+    (text.includes("FunctionDefinition") && text.includes("openai"))
   ) {
     pushUnique(capabilities, "agentTool");
   }
@@ -195,7 +196,7 @@ function detectCapabilitiesFromText(text: string, capabilities: string[]) {
     text.match(/return.*?(system.*?prompt|systemMessage|system_message)/i) ||
     text.match(/response.*?(system.*?prompt|systemMessage)/i) ||
     text.match(/json.*?(system.*?prompt|systemMessage)/i) ||
-    text.includes("systemPrompt") && text.match(/return|response|json/i)
+    (text.includes("systemPrompt") && text.match(/return|response|json/i))
   ) {
     pushUnique(capabilities, "contextLeak");
   }
@@ -215,10 +216,10 @@ function detectControlsFromText(text: string, controls: string[]) {
   if (text.includes("@PreAuthorize") || text.includes("@Secured") || text.includes("SecurityContext") || text.includes("@AuthenticationPrincipal")) {
     pushUnique(controls, "auth");
   }
-  if (text.includes("Authorization") || text.includes("Bearer") || text.includes("Identity")) {
+  if (text.match(/['"]Authorization['"]\s*[,\]]/) || text.match(/Bearer\s+['"]?\w/) || text.match(/req\.headers\[.*authorization/i)) {
     pushUnique(controls, "auth");
   }
-  if (text.includes("role") || text.includes("isAdmin") || text.includes("permission")) {
+  if (text.match(/\bisAdmin\b/) || text.match(/\bpermission\b/i) || text.match(/\brole\b.*(?:admin|user|moderator)/i) || text.match(/\bauthorize\s*\(/i) || text.match(/\brole[-_]?based\s+access/i)) {
     pushUnique(controls, "authorization");
   }
   if (text.includes("rateLimit") || text.includes("limiter") || text.includes("slowapi") || text.includes("RateLimiter")) {
@@ -290,7 +291,7 @@ function detectControlsFromText(text: string, controls: string[]) {
   // Transaction & concurrency
   if (text.match(/BEGIN|COMMIT|ROLLBACK|\.transaction\s*\(/)) pushUnique(controls, "transactionSafety");
   if (text.match(/FOR UPDATE|optimistic|version|rowVersion|etag/)) pushUnique(controls, "concurrencyControl");
-  if (text.match(/circuitBreaker|circuit_breaker|fallback|retryWithBackoff|resilience4j|polly/)) pushUnique(controls, "circuitBreaker");
+  if (text.match(/circuitBreaker|circuit_breaker|retryWithBackoff|resilience4j|polly/) || text.match(/\bfallback\s*\(\s*function|\bfallbackResponse|\bwithFallback\b/i)) pushUnique(controls, "circuitBreaker");
 
   // PII exposure
   if (

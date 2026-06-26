@@ -1,0 +1,10 @@
+{
+  "name": "payment-system-risky",
+  "version": "1.0.0",
+  "description": "Payment processing system",
+  "main": "src/payments.js",
+  "dependencies": {
+    "stripe": "^14.0.0",
+    "express": "^4.18.0"
+  }
+}

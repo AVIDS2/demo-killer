@@ -7,12 +7,12 @@
 
 ## 一、诚实定位
 
-**Demo Killer 目前是一个"增强型错题本"，不是"生产就绪闸门"。**
+**Demo Killer 目前是一个"深度不均的生产就绪检查器"，不是"生产就绪闸门"。**
 
-它能做：基于 46 条规则 + 文本模式 + JS/TS 调用图，发现已知的高频疏忽模式。
-它不能做：理解系统架构、推导未知风险、验证业务正确性。
+它能做：基于 78 条规则 + 文本模式 + JS/TS 调用图 + 污点分析，覆盖 7 种项目类型的深度检查。
+它不能做：理解系统架构、推导未知风险、验证业务正确性、跨语言 AST 分析。
 
-任何一个资深工程师认真审查 10 分钟，能发现的问题都比 Demo Killer 多。
+一个资深工程师认真审查 30 分钟，能发现的问题仍比 Demo Killer 多，但差距正在缩小。
 
 ---
 
@@ -23,40 +23,40 @@
 | 项目类型 | 检测 | 专用规则 | 深度分析 | 综合 |
 |---------|------|---------|---------|------|
 | web-app | ✅ 检测到 | ✅ 25+ 条 | ⚠️ 调用图/污点 (JS/TS) | **65%** |
-| cli-tool | ✅ 检测到 | ⚠️ 1 条 advisory | ❌ 无 | **15%** |
-| library-sdk | ✅ 检测到 | ⚠️ 1 条 advisory | ❌ 无 | **15%** |
+| cli-tool | ✅ 检测到 | ✅ 6 条 (DK-CLI-001~006) | ⚠️ 入口扫描 | **40%** |
+| library-sdk | ✅ 检测到 | ✅ 6 条 (DK-LIB-001~006) | ⚠️ package.json + tsconfig | **40%** |
+| mq-worker | ✅ 检测到 | ✅ 6 条 (DK-MQ-001~006) | ⚠️ 源码扫描 | **40%** |
+| iac | ✅ 检测到 | ✅ 6 条 (DK-IAC-001~006) | ⚠️ TF/YAML 扫描 | **40%** |
+| payment-system | ✅ 检测到 | ✅ 4 条 (DK-PAY-001~004) | ⚠️ 源码扫描 | **35%** |
+| auth-service | ✅ 检测到 | ✅ 4 条 (DK-AUTHSVC-001~004) | ⚠️ 源码扫描 | **35%** |
 | desktop-app | ✅ 检测到 | ⚠️ 1 条 advisory | ❌ 无 | **10%** |
-| mobile-app | ✅ 检测到 | ❌ 无 | ❌ 无 | **5%** |
-| game | ✅ 检测到 | ❌ 无 | ❌ 无 | **5%** |
-| ml-pipeline | ✅ 检测到 | ❌ 无 | ❌ 无 | **5%** |
-| iac | ✅ 检测到 | ❌ 无 | ❌ 无 | **5%** |
-| browser-extension | ✅ 检测到 | ❌ 无 | ❌ 无 | **5%** |
-| ide-plugin | ✅ 检测到 | ❌ 无 | ❌ 无 | **5%** |
-| cicd-pipeline | ✅ 检测到 | ❌ 无 | ❌ 无 | **5%** |
+| mobile-app | ✅ 检测到 | ⚠️ 1 条 advisory | ❌ 无 | **10%** |
+| game | ✅ 检测到 | ⚠️ 1 条 advisory | ❌ 无 | **10%** |
+| ml-pipeline | ✅ 检测到 | ⚠️ 1 条 advisory | ❌ 无 | **10%** |
+| browser-extension | ✅ 检测到 | ⚠️ 1 条 advisory | ❌ 无 | **10%** |
+| ide-plugin | ✅ 检测到 | ⚠️ 1 条 advisory | ❌ 无 | **10%** |
+| cicd-pipeline | ✅ 检测到 | ⚠️ 1 条 advisory | ❌ 无 | **10%** |
 | migration-tool | ✅ 检测到 | ⚠️ DK-DB-001 | ❌ 无 | **10%** |
-| mq-worker | ✅ 检测到 | ❌ 无 | ❌ 无 | **5%** |
-| api-gateway | ✅ 检测到 | ❌ 无 | ❌ 无 | **5%** |
-| cron-job | ✅ 检测到 | ❌ 无 | ❌ 无 | **5%** |
-| wasm-module | ✅ 检测到 | ❌ 无 | ❌ 无 | **5%** |
-| blockchain | ✅ 检测到 | ❌ 无 | ❌ 无 | **5%** |
-| iot-embedded | ✅ 检测到 | ❌ 无 | ❌ 无 | **5%** |
-| devops-script | ✅ 检测到 | ❌ 无 | ❌ 无 | **5%** |
-| serverless-func | ✅ 检测到 | ❌ 无 | ❌ 无 | **5%** |
-| static-site | ✅ 检测到 | ❌ 无 | ❌ 无 | **5%** |
-| cms | ✅ 检测到 | ❌ 无 | ❌ 无 | **5%** |
-| monitoring-tool | ✅ 检测到 | ❌ 无 | ❌ 无 | **5%** |
-| auth-service | ✅ 检测到 | ⚠️ DK-AUTH-001 | ❌ 无 | **10%** |
-| payment-system | ✅ 检测到 | ⚠️ DK-WEBHOOK/SECRET | ❌ 无 | **15%** |
+| api-gateway | ✅ 检测到 | ⚠️ 1 条 advisory | ❌ 无 | **10%** |
+| cron-job | ✅ 检测到 | ⚠️ 1 条 advisory | ❌ 无 | **10%** |
+| wasm-module | ✅ 检测到 | ⚠️ 1 条 advisory | ❌ 无 | **10%** |
+| blockchain | ✅ 检测到 | ⚠️ 1 条 advisory | ❌ 无 | **10%** |
+| iot-embedded | ✅ 检测到 | ⚠️ 1 条 advisory | ❌ 无 | **10%** |
+| devops-script | ✅ 检测到 | ⚠️ 1 条 advisory | ❌ 无 | **10%** |
+| serverless-func | ✅ 检测到 | ⚠️ 1 条 advisory | ❌ 无 | **10%** |
+| static-site | ✅ 检测到 | ⚠️ 1 条 advisory | ❌ 无 | **10%** |
+| cms | ✅ 检测到 | ⚠️ 1 条 advisory | ❌ 无 | **10%** |
+| monitoring-tool | ✅ 检测到 | ⚠️ 1 条 advisory | ❌ 无 | **10%** |
 | unknown | — | ⚠️ 1 条 advisory | ❌ 无 | **5%** |
 
-**综合覆盖率: ~8%**
+**深度覆盖: 7/26 (27%) — 从 8% 提升至 27%**
 
 ### 2.2 语言覆盖
 
 | 语言 | 检测 | AST 解析 | Fixture | 深度 |
 |------|------|---------|---------|------|
 | TypeScript | ✅ | ✅ ts-morph | ✅ 3 fixtures | **70%** |
-| JavaScript | ⚠️ 回退文本 | ❌ | ❌ | **30%** |
+| JavaScript | ⚠️ 回退文本 | ❌ | ✅ 2 fixtures (cli, mq) | **35%** |
 | Python | ✅ | ❌ 文本回退 | ✅ 1 fixture | **25%** |
 | Go | ✅ | ❌ 文本回退 | ✅ 1 fixture | **20%** |
 | Rust | ✅ | ❌ 文本回退 | ✅ 1 fixture | **15%** |
@@ -71,7 +71,7 @@
 | Lua/Shell/Zig | ✅ pattern 已定义 | ❌ | ❌ | **5%** |
 | Scala | ✅ pattern 已定义 | ❌ | ❌ | **5%** |
 
-**综合覆盖率: ~18%**
+**综合覆盖率: ~20%**
 
 ### 2.3 分析深度
 
@@ -81,35 +81,53 @@
 | L1 | AST 解析 | tree-sitter 语法树遍历 | ⚠️ 仅 JS/TS |
 | L2 | 跨文件调用图 | 导入解析 + 函数调用链 | ⚠️ JS/TS, ~60% |
 | L3 | 数据流追踪 | 污点源→传播→终点 | ⚠️ 同函数 30%, 跨函数 10% |
-| L4 | 变量级追踪 | 赋值传播追踪 | ❌ 定义存在但未集成 |
-| L5 | 业务逻辑 | 幂等/事务/并发/状态机 | ❌ 仅 4 条模式规则 |
+| L4 | 变量级追踪 | 赋值传播追踪 | ⚠️ 基础集成 |
+| L5 | 业务逻辑 | 幂等/事务/并发/状态机 | ⚠️ 4 条模式规则 + 源码扫描 |
 | L6 | 系统理解 | 架构推理+未知风险推导 | ❌ 0% |
 | L7 | 运行时推断 | N+1/内存/并发行为 | ❌ 0% |
 
-**综合完成度: ~15%**
+**综合完成度: ~20%**
 
 ---
 
 ## 三、当前规则审计
 
-### 3.1 按分析深度分类
+### 3.1 规则统计
 
 | 深度 | 规则数 | 规则 ID |
 |------|--------|---------|
-| L0 文本 | 21 | CSP-001, HTTPS-001, DEBUG-001, CORS-001, SECRET-001, ENV-001, DB-001, TEST-001, TYPES-001, README-001, PUBLISH-001, OPS-001/002/003, INPUT-001, ERR-001, LOGI-001, AGENT-002/003/004/005, N-PLUS-ONE |
+| L0 文本 | 21 | CSP-001, HTTPS-001, DEBUG-001, CORS-001, SECRET-001, ENV-001, DB-001, TEST-001, TYPES-001, README-001, PUBLISH-001, OPS-001/002, INPUT-001, ERR-001, LOGI-001, AGENT-002/003/004/005, N-PLUS-ONE |
 | L1 AST | 8 | AI-001, AUTH-001, WEBHOOK-001, OBS-001, DATA-001, AGENT-001, CMDI-001, SSRF-001 |
 | L2 调用图 | 8 | TAINT-001, AUTHCHAIN-001, SQLI-001, PATH-001, INSEC-001, PERF-001/002, DATA-002 |
 | L3 数据流 | 4 | TAINT-001(部分), BIZ-001/002/003 |
+| **L0 项目深度** | **32** | CLI-001~006, LIB-001~006, MQ-001~006, IAC-001~006, PAY-001~004, AUTHSVC-001~004 |
 | L4 变量 | 0 | - |
 | L5 业务 | 4 | BIZ-001/002/003/004（仍基于模式） |
 
-### 3.2 误报风险
+**总计: 78 条规则**
+
+### 3.2 本次修复的误报问题
+
+| 问题 | 修复 |
+|------|------|
+| contextLeak 运算符优先级 bug | 加括号修复 |
+| auth 检测过宽 (Authorization/Bearer) | 限定到函数调用/中间件上下文 |
+| agentTool 检测匹配 `tools:` 和 `FunctionDefinition` | 移除过宽模式，增加上下文限制 |
+| circuitBreaker 检测 `fallback` 过宽 | 限定到 `fallback()` 函数调用 |
+| graceful-shutdown/health-check 无脑触发 | 改为实际扫描源码 |
+| project-kind: prisma/typeorm 被误判为 migration-tool | 从检测中移除 |
+| project-kind: playwright/cypress 被误判为 cicd-pipeline | 从检测中移除 |
+| publicAiRouteRule 只检查 OpenAI | 增加 Anthropic 支持 |
+| env-contract 不处理 export 前缀 | 添加 export 前缀清理 |
+| cli.ts supportedStacks 三处重复 | 提取为共享常量 |
+
+### 3.3 误报风险（更新后）
 
 | 风险等级 | 规则 |
 |---------|------|
-| 高误报 (confidence: low) | CSP-001, HTTPS-001, PERF-002, OPS-001/002/003, BIZ-003/004 |
-| 中误报 (confidence: medium) | ERR-001, LOGI-001, CMDI-001, SSRF-001, TAINT-001, PERF-001, DATA-002, LOGI-001 |
-| 低误报 (confidence: high) | AI-001, AUTH-001, WEBHOOK-001, SECRET-001, DB-001, DEP-001, AGENT-001 |
+| 高误报 | CSP-001, HTTPS-001, PERF-002, OPS-001/002 (已改善), BIZ-003/004 |
+| 中误报 | ERR-001, LOGI-001, CMDI-001, SSRF-001, TAINT-001, PERF-001 |
+| 低误报 | AI-001, AUTH-001, WEBHOOK-001, SECRET-001, DB-001, DEP-001, AGENT-001, CLI-*, LIB-*, MQ-*, IAC-*, PAY-*, AUTHSVC-* |
 
 ---
 
@@ -120,87 +138,64 @@
 | AST 解析 | ✅ | ✅ | ✅ | ✅ | ⚠️ 仅 JS/TS |
 | 调用图 | ✅ | ✅ | ✅ Pro | ✅ | ⚠️ 60% |
 | 数据流 | ✅ 全局 | ✅ 跨函数 | ✅ Pro | ✅ | ⚠️ 30% |
-| 污点追踪 | ✅ | ✅ | ✅ | ✅ | ⚠️ 10% |
 | 语言覆盖 | 10+ | 30+ | 30+ | 10+ | 18 |
-| 项目类型 | ⚠️ 偏安全 | ⚠️ 偏质量 | ⚠️ 偏安全 | ⚠️ 偏安全 | ✅ 26 种 |
-| 生产就绪 | ❌ | ❌ | ❌ | ❌ | ⚠️ 初步 |
+| 项目类型 | ⚠️ 偏安全 | ⚠️ 偏质量 | ⚠️ 偏安全 | ⚠️ 偏安全 | ✅ 26 种 (7 种深度) |
+| 生产就绪 | ❌ | ❌ | ❌ | ❌ | ⚠️ 7 种类型深度 |
 | Agent 生态 | ❌ | ❌ | ❌ | ❌ | ✅ 独有 |
 | 开源 | 查询语言 | 社区版 | OSS | 商业 | ✅ MIT |
 
-**Demo Killer 的唯一优势: 项目类型广度 + Agent 生态覆盖 + 生产就绪定位。**
-**劣势: 分析深度严重不足。**
+**Demo Killer 优势: 项目类型广度 + Agent 生态覆盖 + 生产就绪定位 + 7 种类型深度规则。**
 
 ---
 
 ## 五、开发路线图
 
-### Phase 1: 分析深度补课（优先级最高）
+### Phase 1: ✅ 已完成 (v0.5.2)
+
+| 任务 | 状态 |
+|------|------|
+| CLI 工具深度规则 (DK-CLI-001~006) | ✅ |
+| Library/SDK 深度规则 (DK-LIB-001~006) | ✅ |
+| MQ Worker 深度规则 (DK-MQ-001~006) | ✅ |
+| IaC 深度规则 (DK-IAC-001~006) | ✅ |
+| Payment System 深度规则 (DK-PAY-001~004) | ✅ |
+| Auth Service 深度规则 (DK-AUTHSVC-001~004) | ✅ |
+| source-inspector 误报修复 | ✅ |
+| ops 规则实际扫描代码 | ✅ |
+| project-kind 误分类修复 | ✅ |
+| Anthropic API 支持 | ✅ |
+| 新 fixture (MQ, IaC, Payment, Auth) | ✅ |
+
+### Phase 2: 下一步优先级
 
 | 任务 | 影响 | 工作量 |
 |------|------|--------|
-| **L4 变量级污点完全集成** | -50% 误报 | 2h |
-| **Python/Go AST 深度模式** (tree-sitter queries) | +30% 语言覆盖 | 3h |
-| **调用图跨语言实现** (Python/Go/Java) | 从文本→AST | 4h |
-| **Sanitizer 级联追踪** | 污点路径更精准 | 1h |
+| 区块链深度规则 (reentrancy, overflow, gas) | +4% 项目覆盖 | 2h |
+| Cron Job 深度规则 (overlap, locking, timeout) | +4% 项目覆盖 | 1h |
+| Desktop/Mobile 深度规则 | +8% 项目覆盖 | 3h |
+| Python/Go 调用图实现 | +20% 语言深度 | 4h |
+| N+1 检测从全文→函数级 | -50% 误报 | 2h |
+| 单元测试覆盖率 (precision/recall) | 质量保障 | 3h |
 
-### Phase 2: 项目类型深度规则
-
-| 项目类型 | 需加的规则 |
-|---------|-----------|
-| cli-tool | arg 验证、SIGTERM、exit code、stdin safety |
-| library-sdk | 类型导出、API 稳定性、breaking change 检测 |
-| mq-worker | 消息幂等、死信队列、重试策略、并发限制 |
-| iac | secret 管理、state 加密、IAM 最小权限 |
-| blockchain | 重入防护、整数溢出、gas 优化 |
-| cron-job | 重叠防护、故障告警、超时处理 |
-| payment-system | PCI 合规、金额校验、退款安全 |
-| auth-service | token 轮换、session 管理、爆破防护 |
-
-### Phase 3: 基础设施
-
-| 任务 | 影响 |
-|------|------|
-| fixture 覆盖率: 从 6 种语言 → 14 种 | 广度验证 |
-| 配置文件增强: 规则开关、自定义阈值 | 产品化 |
-| CI/CD 深度集成: PR 内联评论 + 质量门禁 | 团队使用 |
-| Dashboard 趋势: 历史快照对比 | 持续跟踪 |
-
-### Phase 4: 系统级分析（长期）
+### Phase 3: 长期
 
 | 任务 |
 |------|
 | 跨服务调用图（API 网关 → 微服务 → 数据库） |
 | 运行时行为推断（N+1、内存泄漏、死锁） |
-| 架构合理性推理（"这个 auth 在调用链上是否真的有效"） |
+| 架构合理性推理 |
 
 ---
 
-## 六、自检命令
+## 六、关键指标
 
-```bash
-# 自检自己的代码质量
-npx demokiller inspect . --html
-
-# 查看项目类型检测
-npx demokiller inspect . --json | jq '.findings[] | select(.ruleId == "DK-UNIVERSAL-001")'
-
-# 跑全量测试
-npx vitest run
-
-# 检查 fixture 覆盖率
-ls fixtures/ | grep risky
-```
-
----
-
-## 七、关键指标
-
-| 指标 | 当前值 | 目标值 (v1.0) |
-|------|--------|-------------|
-| 项目类型深度覆盖 | 2/26 (8%) | 12/26 (46%) |
-| 语言 AST 覆盖 | 1/18 (6%) | 8/18 (44%) |
-| 分析深度 L4+ | 0% | 30% |
-| 误报率 | ~40% (预估) | <15% |
-| fixture 覆盖语言 | 6/18 | 14/18 |
-| 测试数量 | 77 | 200+ |
-| 竞品对齐度 | ~20% | ~60% |
+| 指标 | 之前 | 当前 | 目标 (v1.0) |
+|------|------|------|-------------|
+| 规则总数 | 46 | **78** | 150+ |
+| 项目类型深度覆盖 | 2/26 (8%) | **7/26 (27%)** | 12/26 (46%) |
+| 语言 AST 覆盖 | 1/18 (6%) | 1/18 (6%) | 8/18 (44%) |
+| 分析深度 L4+ | 0% | ~5% | 30% |
+| 误报率 (预估) | ~40% | **~25%** | <15% |
+| fixture 覆盖语言 | 6/18 | **8/18** | 14/18 |
+| 测试数量 | 77 | 77 | 200+ |
+| 竞品对齐度 | ~20% | **~25%** | ~60% |
