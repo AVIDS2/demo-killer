@@ -16,7 +16,7 @@ async function walkSourceFiles(root: string, exts: string[]): Promise<string[]> 
       if (SKIP.has(e.name)) continue;
       const full = path.join(dir, e.name);
       if (e.isDirectory()) await walk(full);
-      else if (exts.some(ext => e.name.endsWith(ext))) results.push(full);
+      else if (exts.some(ext => e.name.endsWith(ext))) results.push(path.relative(root, full));
     }
   }
   await walk(root);
@@ -33,13 +33,13 @@ export async function paymentSystemFindings(root: string, inventory: ProjectInve
   const allContent = (await Promise.all(allFiles.map(f => readFileContent(root, f)))).join("\n");
 
   // DK-PAY-001: No PCI data handling awareness
+  // PCI awareness = compliance measures, NOT card data keywords
   const hasPCIAwareness =
     /pci[_-]?dss/i.test(allContent) ||
-    /card[_-]?number/i.test(allContent) ||
-    /pan\b/i.test(allContent) ||
     /tokenize/i.test(allContent) ||
-    /\bcvv\b/i.test(allContent) ||
-    /secure[_-]?element/i.test(allContent);
+    /secure[_-]?element/i.test(allContent) ||
+    /stripe\.tokens?\b/i.test(allContent) ||
+    /payment[_-]?method[_-]?id/i.test(allContent);
 
   const storesCardData =
     /card[_-]?number\s*[=:]/i.test(allContent) ||
@@ -211,13 +211,14 @@ export async function authServiceFindings(root: string, inventory: ProjectInvent
   }
 
   // DK-AUTHSVC-003: Session management weaknesses
+  // Check for security flags being ENABLED, not just mentioned (avoid matching comments or httpOnly: false)
   const hasSecureSession =
-    /httpOnly/i.test(allContent) ||
+    /httpOnly\s*[=:]\s*(?:true|1)/i.test(allContent) ||
     /secure\s*[=:]\s*true/i.test(allContent) ||
-    /sameSite/i.test(allContent) ||
+    /sameSite\s*[=:]\s*(?:"(?:strict|lax)"|'(?:strict|lax)'|(?:strict|lax))/i.test(allContent) ||
     /session[_-]?store/i.test(allContent) ||
     /session[_-]?timeout/i.test(allContent) ||
-    /max[_-]?age/i.test(allContent);
+    /max[_-]?age\s*[=:]\s*[1-9]/i.test(allContent);
 
   const usesSessions = /session/i.test(allContent) || /cookie/i.test(allContent);
 

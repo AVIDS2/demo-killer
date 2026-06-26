@@ -106,7 +106,24 @@
 
 **总计: 88 条规则**
 
-### 3.2 本次修复的误报问题
+### 3.2 Codex 对抗性审查 (v0.5.3)
+
+本次使用 OpenAI Codex CLI (GPT-5.5) 对 v0.5.2 → v0.5.3 的完整 diff 进行对抗性审查，发现 4 个真实 bug：
+
+| 优先级 | Bug | 根因 | 影响 |
+|--------|-----|------|------|
+| **P1** | `walkSourceFiles` 返回绝对路径，`readFileContent` 拼接后路径错误 | 6 个深度扫描器的 `results.push(full)` 传了绝对路径 | 所有深度扫描器在 Windows 上静默读空内容 |
+| **P1** | `project-kind` 检测顺序错误 | `express` 被 web-framework 先匹配，`stripe+express` 无法识别为 payment-system | 领域项目被误判为通用 web-app |
+| **P2** | PCI 检测自相矛盾 | `hasPCIAwareness` 包含 `card_number`/`cvv`，与 `storesCardData` 相同 | `storesCardData && !hasPCIAwareness` 永远为 false |
+| **P2** | Session 安全误判 | `/httpOnly/i` 匹配注释和 `httpOnly: false` | 存在不安全配置却报告安全 |
+
+**修复：**
+- `walkSourceFiles` 改用 `path.relative(root, full)`（6 个文件）
+- `project-kind.ts` 领域检测（payment/auth/blockchain）移到 web framework 之前
+- `payment-auth.ts` PCI 检测移除与 card data 重叠的关键字
+- `payment-auth.ts` Session 检测改为只匹配启用值（`true`/`1`）
+
+### 3.3 本次修复的误报问题
 
 | 问题 | 修复 |
 |------|------|
@@ -121,7 +138,7 @@
 | env-contract 不处理 export 前缀 | 添加 export 前缀清理 |
 | cli.ts supportedStacks 三处重复 | 提取为共享常量 |
 
-### 3.3 误报风险（更新后）
+### 3.4 误报风险（更新后）
 
 | 风险等级 | 规则 |
 |---------|------|

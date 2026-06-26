@@ -13,8 +13,10 @@ export function detectProjectKind(deps: Record<string, string>, files: string[])
   const depNames = Object.keys(deps);
   const fileStr = files.join(" ").toLowerCase();
 
-  // Web frameworks (most specific first)
-  if (depNames.some(d => d === "next" || d === "@nestjs/core" || d === "react" || d === "vue" || d === "svelte" || d === "angular" || d === "express" || d === "fastify" || d === "flask" || d === "django" || d === "gin" || d === "actix-web")) return "web-app";
+  // Domain-specific deps (check BEFORE web frameworks — stripe+express = payment-system, not web-app)
+  if (depNames.some(d => d === "stripe" || d === "paypal-rest-sdk" || d === "squareup")) return "payment-system";
+  if (depNames.some(d => d === "passport" || d === "@auth/core" || d === "next-auth" || d === "keycloak-js" || d === "@clerk/nextjs")) return "auth-service";
+  if (depNames.some(d => d === "ethers" || d === "web3" || d === "@solana/web3.js" || d === "hardhat")) return "blockchain";
   // Desktop
   if (depNames.some(d => d === "electron" || d === "@tauri-apps/cli" || d === "tauri")) return "desktop-app";
   // Mobile
@@ -31,16 +33,12 @@ export function detectProjectKind(deps: Record<string, string>, files: string[])
   if (depNames.some(d => d === "kafkajs" || d === "amqplib" || d === "bullmq" || d === "bull")) return "mq-worker";
   // Cron
   if (depNames.some(d => d === "node-cron" || d === "node-schedule" || d === "celery")) return "cron-job";
-  // Blockchain
-  if (depNames.some(d => d === "ethers" || d === "web3" || d === "@solana/web3.js" || d === "hardhat")) return "blockchain";
-  // Payment
-  if (depNames.some(d => d === "stripe" || d === "paypal-rest-sdk" || d === "squareup")) return "payment-system";
-  // Auth
-  if (depNames.some(d => d === "passport" || d === "@auth/core" || d === "next-auth" || d === "keycloak-js" || d === "@clerk/nextjs")) return "auth-service";
   // Serverless
   if (depNames.some(d => d.includes("serverless") || d === "@aws-lambda" || d.startsWith("@aws-sdk"))) return "serverless-func";
   // File-based serverless detection
   if (fileStr.includes("serverless.yml") || fileStr.includes("template.yaml") || fileStr.includes("samconfig.toml")) return "serverless-func";
+  // Web frameworks (generic — after domain-specific to avoid stripe+express → web-app)
+  if (depNames.some(d => d === "next" || d === "@nestjs/core" || d === "react" || d === "vue" || d === "svelte" || d === "angular" || d === "express" || d === "fastify" || d === "flask" || d === "django" || d === "gin" || d === "actix-web")) return "web-app";
   // Static site generators
   if (depNames.some(d => d === "astro" || d === "gatsby" || d === "hugo" || d === "next" && depNames.some(x => x === "sharp" || x === "rehype"))) return "static-site";
   // Browser extensions

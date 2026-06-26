@@ -16,7 +16,7 @@ async function walkSourceFiles(root: string, exts: string[]): Promise<string[]> 
       if (SKIP.has(e.name)) continue;
       const full = path.join(dir, e.name);
       if (e.isDirectory()) await walk(full);
-      else if (exts.some(ext => e.name.endsWith(ext))) results.push(full);
+      else if (exts.some(ext => e.name.endsWith(ext))) results.push(path.relative(root, full));
     }
   }
   await walk(root);
