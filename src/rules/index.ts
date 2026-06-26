@@ -13,7 +13,6 @@ import { mcpServerAuthRule } from "./mcp-server-auth.js";
 import { promptInjectionRule } from "./prompt-injection.js";
 // Security rules
 import { adminMutationAuthRule } from "./admin-mutation-auth.js";
-import { authChainFindings } from "./auth-chain.js";
 import { commandInjectionRule } from "./command-injection.js";
 import { connectionPoolingRule } from "./connection-pooling.js";
 import { corsWildcardRule } from "./cors-wildcard.js";
