@@ -6,6 +6,8 @@ import type { Finding } from "../types.js";
 // Agent rules
 import { agentCodeExecRule } from "./agent-code-exec.js";
 import { agentToolLimitRule } from "./agent-tool-limit.js";
+import { authChainFindings } from "./auth-chain.js";
+import { concurrencyRule, featureFlagRule, paymentIdempotencyRule, transactionSafetyRule } from "./business-logic.js";
 import { contextLeakRule } from "./context-leak.js";
 import { mcpServerAuthRule } from "./mcp-server-auth.js";
 import { promptInjectionRule } from "./prompt-injection.js";
@@ -95,6 +97,10 @@ export async function analyzeFindings(root: string): Promise<AnalysisResult> {
     ...routeEvidence.flatMap(httpsEnforcementRule),
     ...routeEvidence.flatMap(nPlusOneRule),
     ...routeEvidence.flatMap(piiExposureRule),
+    ...routeEvidence.flatMap(paymentIdempotencyRule),
+    ...routeEvidence.flatMap(transactionSafetyRule),
+    ...routeEvidence.flatMap(concurrencyRule),
+    ...routeEvidence.flatMap(featureFlagRule),
     ...routeEvidence.flatMap(requestTimeoutRule),
     ...routeEvidence.flatMap(connectionPoolingRule),
     // Agent rules

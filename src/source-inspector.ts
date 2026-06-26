@@ -287,6 +287,11 @@ function detectControlsFromText(text: string, controls: string[]) {
     pushUnique(controls, "connectionPooling");
   }
 
+  // Transaction & concurrency
+  if (text.match(/BEGIN|COMMIT|ROLLBACK|\.transaction\s*\(/)) pushUnique(controls, "transactionSafety");
+  if (text.match(/FOR UPDATE|optimistic|version|rowVersion|etag/)) pushUnique(controls, "concurrencyControl");
+  if (text.match(/circuitBreaker|circuit_breaker|fallback|retryWithBackoff|resilience4j|polly/)) pushUnique(controls, "circuitBreaker");
+
   // PII exposure
   if (
     text.match(/return.*\b(email|phone|ssn|social_security|credit_card|passport|address|dob|date_of_birth)\b/) ||
