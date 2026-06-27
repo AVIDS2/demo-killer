@@ -294,7 +294,7 @@ function detectControlsFromText(text: string, controls: string[]) {
   if (text.includes("idempotency") || text.includes("event.id")) {
     pushUnique(controls, "idempotency");
   }
-  if (text.match(/\.parse\s*\(/) || text.match(/\.safeParse\s*\(/) || text.match(/\.validate\s*\(/) || text.match(/\.model_validate\s*\(/) || text.includes("BaseModel") || text.includes("Schema(") || text.includes("dataclass") || text.includes("validator.New") || text.includes("serde::Deserialize") || text.includes("@Valid") || text.includes("@NotNull")) {
+  if (text.match(/\.parse\s*\(/) || text.match(/\.safeParse\s*\(/) || text.match(/\.validate\s*\(/) || text.match(/\.model_validate\s*\(/) || text.includes("BaseModel") || text.includes("Schema(") || text.includes("dataclass") || text.includes("validator.New") || text.includes("serde::Deserialize") || text.includes("@Valid") || text.includes("@Validated") || text.includes("@NotNull") || text.includes("@NotBlank") || text.includes("@field:NotNull") || text.includes("@field:NotBlank") || text.includes("validate.") || text.match(/binding:"required"/) || text.match(/validate:"required"/) || text.match(/\bc\s*\.\s*(ShouldBindJSON|Bind|BindJSON)\s*\(/)) {
     pushUnique(controls, "inputValidation");
   }
   if (text.match(/\.catch\s*\(/) || text.match(/\bexcept\b/) || text.match(/\btry:\s*$/m) || text.match(/\bif\s+err\s*!=\s*nil/) || text.includes("Result<") || text.match(/\bcatch\s*\(\s*\w+/) || text.includes("@ExceptionHandler")) {

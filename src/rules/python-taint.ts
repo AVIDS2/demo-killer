@@ -2,6 +2,7 @@ import type { Finding } from "../types.js";
 import type { ProjectInventory } from "../inventory.js";
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import type { PythonCallGraph, PythonCallSite, PythonFuncDef } from "../python-call-graph.js";
 
 async function readFileContent(root: string, file: string): Promise<string> {
   try { return await fs.readFile(path.join(root, file), "utf8"); } catch { return ""; }
@@ -210,6 +211,170 @@ export async function pythonFindings(root: string, inventory: ProjectInventory):
       ],
       evidence: [{ id: "py-scan", detector: "project-scan", location: { path: "." }, controls: [], signals: ["HTTP client with user-controlled URL"] }],
     });
+  }
+
+  // DK-PY-007: Cross-function taint path analysis via call graph
+  try {
+    const { buildPythonCallGraph } = await import("../python-call-graph.js");
+    const callGraph: PythonCallGraph = await buildPythonCallGraph(root);
+
+    // Dangerous sinks that should not receive tainted input without sanitization
+    const DANGEROUS_SINKS = new Set([
+      "execute", "executemany", "raw",
+      "eval", "exec", "os.system", "os.popen",
+      "subprocess.call", "subprocess.run", "subprocess.Popen",
+      "subprocess.check_output", "subprocess.check_call",
+      "pickle.loads", "pickle.load", "yaml.load",
+      "marshal.loads", "marshal.load", "shelve.open",
+      "requests.get", "requests.post", "requests.put",
+      "requests.delete", "requests.patch",
+      "httpx.get", "httpx.post", "httpx.put",
+      "httpx.delete", "httpx.patch",
+      "urllib.request.urlopen",
+      "open", "Path",
+    ]);
+
+    // Sanitization functions that neutralize tainted data
+    const SANITIZERS = new Set([
+      "shlex.quote", "escape", "sanitize", "safe_load", "safe_dump",
+      "parameterize", "validate", "secure_filename", "realpath",
+      "quote_plus", "url_quote", "bleach.clean", "markupsafe.escape",
+      "html.escape", "json.dumps", "json.loads",
+    ]);
+
+    // Identify route handler functions (entry points for user input)
+    const routeHandlers = new Set<string>();
+    for (const route of callGraph.routes) {
+      const qualified = `${route.file}:${route.handler}`;
+      routeHandlers.add(qualified);
+    }
+
+    // Also consider functions with request parameters as potential entry points
+    for (const [qualified, func] of callGraph.functions) {
+      const rawLower = func.rawParams.toLowerCase();
+      if (rawLower.includes("request") || rawLower.includes("form") ||
+          rawLower.includes("query") || rawLower.includes("body")) {
+        routeHandlers.add(qualified);
+      }
+    }
+
+    // Build a call adjacency map: caller -> [callee]
+    const callAdjacency = new Map<string, PythonCallSite[]>();
+    for (const call of callGraph.calls) {
+      const existing = callAdjacency.get(call.caller) ?? [];
+      existing.push(call);
+      callAdjacency.set(call.caller, existing);
+    }
+
+    // Trace taint from route handlers to dangerous sinks via BFS
+    const visited = new Set<string>();
+    const taintFindings: { entry: string; sink: string; path: string[] }[] = [];
+
+    for (const entry of routeHandlers) {
+      const queue: { func: string; path: string[] }[] = [{ func: entry, path: [entry] }];
+      visited.clear();
+
+      while (queue.length > 0) {
+        const current = queue.shift()!;
+        if (visited.has(current.func)) continue;
+        visited.add(current.func);
+
+        const calls = callAdjacency.get(current.func) ?? [];
+        for (const call of calls) {
+          const calleeName = call.callee;
+
+          // Check if callee is a dangerous sink
+          const isSink = DANGEROUS_SINKS.has(calleeName) ||
+            // Also match dotted variants (e.g., "cursor.execute" for "execute")
+            Array.from(DANGEROUS_SINKS).some(sink => calleeName.endsWith(`.${sink}`));
+
+          if (isSink) {
+            // Check if any function in the taint path uses a sanitizer
+            const pathUsesSanitizer = current.path.some(p => {
+              const funcCalls = callAdjacency.get(p) ?? [];
+              return funcCalls.some(fc =>
+                SANITIZERS.has(fc.callee) ||
+                Array.from(SANITIZERS).some(s => fc.callee.endsWith(`.${s}`))
+              );
+            });
+
+            if (!pathUsesSanitizer) {
+              taintFindings.push({
+                entry,
+                sink: calleeName,
+                path: [...current.path, `${call.file}:${call.line}`],
+              });
+            }
+          }
+
+          // Resolve callee to a function in the call graph for traversal
+          // Try exact match, then file-local match
+          let nextFunc: string | undefined;
+          if (callGraph.functions.has(calleeName)) {
+            nextFunc = calleeName;
+          } else {
+            // Search by function name within the same file
+            const filePrefix = `${call.file}:`;
+            for (const [q] of callGraph.functions) {
+              if (q.startsWith(filePrefix) && q.endsWith(`:${calleeName}`)) {
+                nextFunc = q;
+                break;
+              }
+            }
+            // Also check simple name match across files
+            if (!nextFunc) {
+              for (const [q] of callGraph.functions) {
+                if (q.endsWith(`:${calleeName}`)) {
+                  nextFunc = q;
+                  break;
+                }
+              }
+            }
+          }
+
+          if (nextFunc && !visited.has(nextFunc)) {
+            queue.push({ func: nextFunc, path: [...current.path, nextFunc] });
+          }
+        }
+      }
+    }
+
+    // Deduplicate by sink
+    const seenSinks = new Set<string>();
+    for (const tf of taintFindings) {
+      const key = `${tf.entry}->${tf.sink}`;
+      if (seenSinks.has(key)) continue;
+      seenSinks.add(key);
+
+      findings.push({
+        ruleId: "DK-PY-007",
+        title: `Cross-function taint path: route handler → ${tf.sink} without sanitization`,
+        severity: "blocker",
+        confidence: "high",
+        missingControls: ["crossFunctionTaintSanitization"],
+        consequence: `User input from route handler "${tf.entry}" flows through function calls to dangerous sink "${tf.sink}" without passing through a sanitization function. This enables multi-step injection attacks where tainted data crosses function boundaries.`,
+        acceptanceCriteria: [
+          "Sanitize all user input before it reaches dangerous functions (execute, eval, os.system, etc.).",
+          "Use a centralized input validation/sanitization layer at the route handler boundary.",
+          "Prefer parameterized queries over string interpolation for database operations.",
+          "Use subprocess with argument lists instead of shell strings.",
+        ],
+        evidence: [{
+          id: "py-call-graph",
+          detector: "python-call-graph",
+          location: { path: tf.path[0]?.split(":")[0] ?? "." },
+          controls: [],
+          signals: [
+            `Taint path: ${tf.path.join(" → ")}`,
+            `Entry: ${tf.entry}`,
+            `Sink: ${tf.sink}`,
+          ],
+        }],
+      });
+    }
+  } catch {
+    // tree-sitter not available or buildPythonCallGraph failed;
+    // text-based rules (DK-PY-001 through DK-PY-006) still apply
   }
 
   return findings;

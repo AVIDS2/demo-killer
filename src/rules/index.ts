@@ -57,6 +57,20 @@ import { desktopAppFindings } from "./desktop-app.js";
 import { mobileAppFindings } from "./mobile-app.js";
 import { agentMcpFindings } from "./agent-mcp.js";
 import { pythonFindings } from "./python-taint.js";
+import { gameFindings } from "./game.js";
+import { mlPipelineFindings } from "./ml-pipeline.js";
+import { browserExtensionFindings } from "./browser-extension.js";
+import { idePluginFindings } from "./ide-plugin.js";
+import { cicdPipelineFindings } from "./cicd-pipeline.js";
+import { migrationToolFindings } from "./migration-tool.js";
+import { apiGatewayFindings } from "./api-gateway.js";
+import { wasmModuleFindings } from "./wasm-module.js";
+import { blockchainFindings } from "./blockchain.js";
+import { iotEmbeddedFindings } from "./iot-embedded.js";
+import { devopsScriptFindings } from "./devops-script.js";
+import { staticSiteFindings } from "./static-site.js";
+import { cmsFindings } from "./cms.js";
+import { monitoringToolFindings } from "./monitoring-tool.js";
 import { tsStrictRule } from "./ts-strict.js";
 import { projectTypeFindings } from "./universal-project.js";
 
@@ -147,6 +161,20 @@ export async function analyzeFindings(root: string): Promise<AnalysisResult> {
     ...(await mobileAppFindings(root, inventory)),
     ...(await agentMcpFindings(root, inventory)),
     ...(await pythonFindings(root, inventory)),
+    ...(await gameFindings(root, inventory)),
+    ...(await mlPipelineFindings(root, inventory)),
+    ...(await browserExtensionFindings(root, inventory)),
+    ...(await idePluginFindings(root, inventory)),
+    ...(await cicdPipelineFindings(root, inventory)),
+    ...(await migrationToolFindings(root, inventory)),
+    ...(await apiGatewayFindings(root, inventory)),
+    ...(await wasmModuleFindings(root, inventory)),
+    ...(await blockchainFindings(root, inventory)),
+    ...(await iotEmbeddedFindings(root, inventory)),
+    ...(await devopsScriptFindings(root, inventory)),
+    ...(await staticSiteFindings(root, inventory)),
+    ...(await cmsFindings(root, inventory)),
+    ...(await monitoringToolFindings(root, inventory)),
     ...projectTypeFindings(inventory),
     ...(await gracefulShutdownRule(inventory)),
     ...(await healthCheckRule(inventory)),

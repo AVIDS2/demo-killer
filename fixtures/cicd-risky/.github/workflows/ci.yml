@@ -1,0 +1,11 @@
+name: CI
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      NPM_TOKEN: "npm_abc123secrettoken"
+    steps:
+      - uses: actions/checkout@main
+      - uses: actions/setup-node@v3
+      - run: npm publish

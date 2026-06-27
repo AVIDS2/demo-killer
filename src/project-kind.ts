@@ -37,6 +37,28 @@ export function detectProjectKind(deps: Record<string, string>, files: string[])
   if (depNames.some(d => d.includes("serverless") || d === "@aws-lambda" || d.startsWith("@aws-sdk"))) return "serverless-func";
   // File-based serverless detection
   if (fileStr.includes("serverless.yml") || fileStr.includes("template.yaml") || fileStr.includes("samconfig.toml")) return "serverless-func";
+  // API gateways
+  if (depNames.some(d => d === "kong" || d === "express-gateway")) return "api-gateway";
+  if (fileStr.includes("kong.yml") || fileStr.includes("kong.yaml")) return "api-gateway";
+  // IDE plugins
+  if (depNames.some(d => d === "vscode" || d === "@types/vscode" || d === "vsce")) return "ide-plugin";
+  // CI/CD pipelines
+  if (fileStr.includes(".github/workflows") || fileStr.includes("jenkinsfile") || fileStr.includes(".gitlab-ci") || fileStr.includes(".circleci")) return "cicd-pipeline";
+  // Migration tools
+  if (depNames.some(d => d === "knex" || d === "sequelize-cli" || d === "flyway" || d === "alembic")) return "migration-tool";
+  // WASM modules
+  if (depNames.some(d => d === "wasm-pack" || d === "assemblyscript" || d === "wasm-bindgen")) return "wasm-module";
+  if (fileStr.includes(".wasm") || fileStr.includes("wasm-pack")) return "wasm-module";
+  // IoT / embedded
+  if (depNames.some(d => d === "platformio" || d === "particle" || d === "johnny-five" || d === "firmata")) return "iot-embedded";
+  if (fileStr.includes("platformio.ini") || fileStr.includes("arduino") || fileStr.includes(".ino")) return "iot-embedded";
+  // DevOps scripts
+  if (depNames.some(d => d === "shelljs" || d === "zx")) return "devops-script";
+  if (fileStr.includes("makefile") || fileStr.includes("dockerfile") && !fileStr.includes("src/")) return "devops-script";
+  // Monitoring tools
+  if (depNames.some(d => d === "prom-client" || d === "@grafana/ui" || d === "statsd" || d === "datadog")) return "monitoring-tool";
+  // CMS
+  if (depNames.some(d => d === "strapi" || d === "directus" || d === "@keystone-6/core" || d === "payload" || d === "sanity")) return "cms";
   // Web frameworks (generic — after domain-specific to avoid stripe+express → web-app)
   if (depNames.some(d => d === "next" || d === "@nestjs/core" || d === "react" || d === "vue" || d === "svelte" || d === "angular" || d === "express" || d === "fastify" || d === "flask" || d === "django" || d === "gin" || d === "actix-web")) return "web-app";
   // Static site generators

@@ -185,4 +185,102 @@ describe("analyzeFindings", () => {
     const ruleIds = findings.map(f => f.ruleId);
     expect(ruleIds.some(id => id.startsWith("DK-AGENT-"))).toBe(true);
   });
+
+  it("game fixture gets game deep rules", async () => {
+    const { findings, inventory } = await analyzeFindings("fixtures/game-risky");
+    expect(inventory.projectKind).toBe("game");
+    const ruleIds = findings.map(f => f.ruleId);
+    expect(ruleIds.some(id => id.startsWith("DK-GAME-"))).toBe(true);
+  });
+
+  it("ml-pipeline fixture gets ML deep rules", async () => {
+    const { findings, inventory } = await analyzeFindings("fixtures/ml-pipeline-risky");
+    expect(inventory.projectKind).toBe("ml-pipeline");
+    const ruleIds = findings.map(f => f.ruleId);
+    expect(ruleIds.some(id => id.startsWith("DK-ML-"))).toBe(true);
+  });
+
+  it("browser extension fixture gets extension rules", async () => {
+    const { findings, inventory } = await analyzeFindings("fixtures/browser-ext-risky");
+    expect(inventory.projectKind).toBe("browser-extension");
+    const ruleIds = findings.map(f => f.ruleId);
+    expect(ruleIds.some(id => id.startsWith("DK-EXT-"))).toBe(true);
+  });
+
+  it("ide plugin fixture gets IDE rules", async () => {
+    const { findings, inventory } = await analyzeFindings("fixtures/ide-plugin-risky");
+    expect(inventory.projectKind).toBe("ide-plugin");
+    const ruleIds = findings.map(f => f.ruleId);
+    expect(ruleIds.some(id => id.startsWith("DK-IDE-"))).toBe(true);
+  });
+
+  it("cicd pipeline fixture gets CI/CD rules", async () => {
+    const { findings, inventory } = await analyzeFindings("fixtures/cicd-risky");
+    expect(inventory.projectKind).toBe("cicd-pipeline");
+    const ruleIds = findings.map(f => f.ruleId);
+    expect(ruleIds.some(id => id.startsWith("DK-CICD-"))).toBe(true);
+  });
+
+  it("migration tool fixture gets migration rules", async () => {
+    const { findings, inventory } = await analyzeFindings("fixtures/migration-risky");
+    expect(inventory.projectKind).toBe("migration-tool");
+    const ruleIds = findings.map(f => f.ruleId);
+    expect(ruleIds.some(id => id.startsWith("DK-MIG-"))).toBe(true);
+  });
+
+  it("api gateway fixture gets gateway rules", async () => {
+    const { findings, inventory } = await analyzeFindings("fixtures/api-gateway-risky");
+    expect(inventory.projectKind).toBe("api-gateway");
+    const ruleIds = findings.map(f => f.ruleId);
+    expect(ruleIds.some(id => id.startsWith("DK-APIGW-"))).toBe(true);
+  });
+
+  it("wasm module fixture gets WASM rules", async () => {
+    const { findings, inventory } = await analyzeFindings("fixtures/wasm-risky");
+    expect(inventory.projectKind).toBe("wasm-module");
+    const ruleIds = findings.map(f => f.ruleId);
+    expect(ruleIds.some(id => id.startsWith("DK-WASM-"))).toBe(true);
+  });
+
+  it("blockchain fixture gets blockchain rules", async () => {
+    const { findings, inventory } = await analyzeFindings("fixtures/blockchain-risky");
+    expect(inventory.projectKind).toBe("blockchain");
+    const ruleIds = findings.map(f => f.ruleId);
+    expect(ruleIds.some(id => id.startsWith("DK-CHAIN-"))).toBe(true);
+  });
+
+  it("iot embedded fixture gets IoT rules", async () => {
+    const { findings, inventory } = await analyzeFindings("fixtures/iot-risky");
+    expect(inventory.projectKind).toBe("iot-embedded");
+    const ruleIds = findings.map(f => f.ruleId);
+    expect(ruleIds.some(id => id.startsWith("DK-IOT-"))).toBe(true);
+  });
+
+  it("devops script fixture gets devops rules", async () => {
+    const { findings, inventory } = await analyzeFindings("fixtures/devops-risky");
+    expect(inventory.projectKind).toBe("devops-script");
+    const ruleIds = findings.map(f => f.ruleId);
+    expect(ruleIds.some(id => id.startsWith("DK-DEVOPS-"))).toBe(true);
+  });
+
+  it("static site fixture gets static rules", async () => {
+    const { findings, inventory } = await analyzeFindings("fixtures/static-site-risky");
+    expect(inventory.projectKind).toBe("static-site");
+    const ruleIds = findings.map(f => f.ruleId);
+    expect(ruleIds.some(id => id.startsWith("DK-STATIC-"))).toBe(true);
+  });
+
+  it("cms fixture gets CMS rules", async () => {
+    const { findings, inventory } = await analyzeFindings("fixtures/cms-risky");
+    expect(inventory.projectKind).toBe("cms");
+    const ruleIds = findings.map(f => f.ruleId);
+    expect(ruleIds.some(id => id.startsWith("DK-CMS-"))).toBe(true);
+  });
+
+  it("monitoring tool fixture gets monitoring rules", async () => {
+    const { findings, inventory } = await analyzeFindings("fixtures/monitoring-risky");
+    expect(inventory.projectKind).toBe("monitoring-tool");
+    const ruleIds = findings.map(f => f.ruleId);
+    expect(ruleIds.some(id => id.startsWith("DK-MON-"))).toBe(true);
+  });
 });
