@@ -1,407 +1,446 @@
 <p align="center">
-  <img src="assets/demokiller-banner.svg" alt="Demo Killer - Agent-native production gate" width="760" />
+  <img src="assets/demokiller-banner.svg" alt="Demo Killer" width="720">
 </p>
 
 <h1 align="center">Demo Killer</h1>
 
 <p align="center">
-  <strong>杀死你的 demo，转型成真正的可生产交付落地级。</strong>
+  <strong>AI builds demos. Demo Killer makes them production-ready.</strong><br>
+  The production gate that kills AI-generated demos before they ship. 155 rules. 26 project types. One command.
 </p>
 
 <p align="center">
-  面向 AI 生成项目的开源生产就绪闸门：当前以 npm CLI 和 agent guidance 接入 coding agents，并面向 MCP、Agent Skills、插件和 CI 扩展；在交付前识别 launch blockers、解释真实生产风险，并生成可复查的加固路径。
+  <a href="https://www.npmjs.com/package/demokiller"><img src="https://img.shields.io/npm/v/demokiller.svg?style=for-the-badge&logo=npm&color=cb3837" alt="npm"></a>
+  <a href="https://www.npmjs.com/package/demokiller"><img src="https://img.shields.io/npm/dm/demokiller.svg?style=for-the-badge&logo=npm&color=7c3aed" alt="downloads"></a>
+  <a href="https://github.com/AVIDS2/demokiller/actions"><img src="https://img.shields.io/github/actions/workflow/status/AVIDS2/demokiller/ci.yml?style=for-the-badge&label=CI&logo=github" alt="CI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-2563eb?style=for-the-badge" alt="license"></a>
+  <a href="https://github.com/AVIDS2/demokiller"><img src="https://img.shields.io/github/stars/AVIDS2/demokiller?style=for-the-badge&logo=github&color=facc15" alt="stars"></a>
 </p>
 
 <p align="center">
-  <a href="README.en.md">English</a>
-  ·
-  <a href="https://www.npmjs.com/package/demokiller">npm</a>
-  ·
-  <a href="https://github.com/AVIDS2/demokiller">GitHub</a>
-  ·
-  <a href="#快速开始">快速开始</a>
-  ·
-  <a href="#给-agent-使用">给 Agent 使用</a>
-  ·
-  <a href="#roadmap">Roadmap</a>
-</p>
-
-<p align="center">
-  <a href="https://www.npmjs.com/package/demokiller"><img alt="npm version" src="https://img.shields.io/npm/v/demokiller?style=flat-square&label=npm&color=cb3837"></a>
-  <a href="https://www.npmjs.com/package/demokiller"><img alt="npm downloads" src="https://img.shields.io/npm/dm/demokiller?style=flat-square&label=downloads&color=0ea5e9"></a>
-  <a href="https://github.com/AVIDS2/demokiller/blob/main/LICENSE"><img alt="license" src="https://img.shields.io/npm/l/demokiller?style=flat-square&label=license&color=22c55e"></a>
-  <a href="https://github.com/AVIDS2/demokiller/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/AVIDS2/demokiller/ci.yml?branch=main&style=flat-square&label=CI"></a>
-  <a href="https://github.com/AVIDS2/demokiller/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/AVIDS2/demokiller?style=flat-square&label=stars&color=facc15"></a>
-</p>
-
-<p align="center">
-  <strong>CLI</strong>
-  ·
-  <strong>MCP</strong>
-  ·
-  <strong>Agent Skills</strong>
-  ·
-  <strong>Plugin</strong>
-  ·
-  <strong>Production Gate</strong>
+  <a href="README.zh-CN.md">简体中文</a> |
+  <a href="#quick-start">Quick Start</a> |
+  <a href="#what-it-checks">What It Checks</a> |
+  <a href="#for-agents--ci">For Agents</a> |
+  <a href="#project-types">Project Types</a> |
+  <a href="https://github.com/AVIDS2/demokiller/wiki">Docs</a>
 </p>
 
 ---
 
-> 正在用 Codex、Claude Code、Cursor、Gemini CLI 或其他 AI coding agent 做项目？先运行 `npx demokiller init .`，把 Demo Killer 写进交付前流程，让 `Launch Blocked` 真的阻断上线，而不是被 UI polish 和重构任务盖过去。
+## The problem
 
-Demo Killer 是面向 AI 生成项目的开源生产就绪闸门。它让 Codex、Claude Code、Cursor、Gemini CLI 等 coding agents 在交付前先检查真实上线阻断项，而不是把能跑的 demo 当成可生产系统。
+Your AI assistant built you an app in 30 minutes. It runs locally. It looks right.
 
-当前版本以 npm CLI 和 agent guidance 为主，Roadmap 会继续扩展到 MCP server、Agent Skills、Claude/Codex/Cursor 插件和 CI 闸门。它不是普通代码扫描器，也不是一个“生产就绪认证”。它更像一个本地的上线前生产工程师：
+But can it actually ship?
 
-- 找出 launch blocker，而不是给一个虚假的高分。
-- 用文件证据解释问题，而不是泛泛提醒“注意安全”。
-- 讲清楚生产后果，而不是只列 checklist。
-- 给出分阶段 hardening plan，而不是丢给你一堆无序任务。
-- 让 AI agent 也能把 Demo Killer 当作交付前闸门。
+- API keys hardcoded in source code
+- No input validation on any endpoint
+- Webhook signatures never verified
+- Admin routes open to anyone
+- CORS wide open, no CSP, no HTTPS redirect
+- Zero tests, zero error handling
 
-## 产品快照
+Your linter says 87/100. Demo Killer says **Launch Blocked**.
+
+---
+
+## One command
+
+```bash
+npx demokiller inspect . --markdown
+```
+
+That's it. No install. No config. Point it at any project and get a hard verdict.
+
+```
+verdict: Launch Blocked
+
+  DK-AI-001  blocker  Hardcoded API key detected
+    file:    src/lib/openai.ts
+    why:     API key exposed in source code, visible to anyone with repo access
+    fix:     Move key to environment variable, add .env to .gitignore
+
+  DK-CORS-001  high  CORS allows all origins
+    file:    src/server.ts
+    why:     Any website can make authenticated requests to your API
+    fix:     Restrict origins to your actual domain
+
+  DK-AUTH-001  high  No authentication on admin route
+    file:    src/routes/admin.ts
+    why:     /admin/users is accessible without any auth check
+    fix:     Add auth middleware before route handler
+```
+
+Each finding tells you **what**, **where**, **why it matters**, and **exactly how to fix it**.
+
+---
+
+## What it checks
+
+Demo Killer doesn't just lint — it runs a **production readiness audit** across your entire codebase.
+
+| Check | What it finds |
+|-------|---------------|
+| **Security** | Hardcoded secrets, SQL injection, XSS, SSRF, command injection, path traversal |
+| **Authentication** | Missing auth on routes, weak session config, unsigned webhooks |
+| **Input Validation** | Unsanitized request body, missing parameter checks, no type safety |
+| **Error Handling** | Swallowed exceptions, missing try/catch, exposed stack traces |
+| **Observability** | No logging, no health checks, no graceful shutdown |
+| **Performance** | N+1 queries, missing timeouts, no connection pooling |
+| **Agent Safety** | Prompt injection, unchecked tool execution, context leaks, LLM eval |
+| **Business Logic** | Missing idempotency on payments, no transaction safety, race conditions |
+| **TypeScript** | Strict mode disabled, missing type declarations |
+| **Testing** | Zero test files, no CI, no coverage |
+| **Dependencies** | Known vulnerabilities, unused packages, missing lockfile |
+| **Deployment** | Missing Docker health check, no graceful shutdown, no env contract |
+
+Demo Killer also runs **26 project-type-specific rule sets** — a Python API gets different checks than a blockchain contract or a CLI tool.
+
+---
+
+## How results work
+
+| Verdict | Meaning |
+|---------|---------|
+| **Launch Blocked** | Has blocker findings. Do not ship. |
+| **Hardening Required** | Has high-severity findings. Ship with risk acceptance. |
+| **Minor Issues** | Has medium findings. Ship, but track them. |
+| **Production Ready** | No significant findings. Good to go. |
+
+Every finding includes:
+- **File and line** — where the problem is
+- **Severity** — blocker / high / medium / advisory
+- **Consequence** — what happens in production if you ignore this
+- **Acceptance criteria** — exactly what "fixed" looks like
+- **Controls** — what's missing (e.g., "add rate limiting", "verify webhook signature")
+
+---
+
+## Quick Start
+
+```bash
+# Install globally
+npm install -g demokiller
+
+# Inspect any project
+demokiller inspect .
+
+# Output as markdown (great for PRs)
+demokiller inspect . --format markdown
+
+# Output as SARIF (GitHub Code Scanning)
+demokiller inspect . --format sarif > results.sarif
+
+# Only show blockers
+demokiller inspect . --severity blocker
+
+# Save baseline, then diff on next run
+demokiller inspect . --save-baseline .dk-baseline.json
+demokiller recheck .   # shows only new findings since baseline
+
+# Scaffold agent integration files
+demokiller init .
+```
+
+Or skip install entirely:
+
+```bash
+npx demokiller inspect . --markdown
+```
+
+---
+
+## For Agents & CI
+
+Demo Killer is **agent-native**. It speaks MCP, outputs structured JSON, and writes agent guidance files.
+
+### Claude Code
+
+```jsonc
+// .claude/settings.json
+{
+  "mcpServers": {
+    "demokiller": {
+      "command": "npx",
+      "args": ["demokiller-mcp"]
+    }
+  }
+}
+```
+
+Then ask Claude: *"Run a Demo Killer inspection and fix all blockers."*
+
+### Cursor / Windsurf / Claude Desktop
+
+```jsonc
+{
+  "mcpServers": {
+    "demokiller": {
+      "command": "npx",
+      "args": ["demokiller-mcp"]
+    }
+  }
+}
+```
+
+### GitHub Actions
+
+```yaml
+- name: Production Gate
+  run: npx demokiller inspect . --format sarif > results.sarif
+
+- name: Upload SARIF
+  uses: github/codeql-action/upload-sarif@v3
+  with:
+    sarif_file: results.sarif
+```
+
+### Agent Skill
+
+After `demokiller init .`, any agent with skill support gets a `/demokiller` command that auto-triggers on production-readiness checks. The skill reads the verdict, prioritizes blockers, and generates an actionable fix plan.
+
+---
+
+## Project types
+
+Demo Killer detects **26 project types** and applies type-specific rules for each one.
 
 <table>
-  <tr>
-    <td><strong>包名</strong><br><code>demokiller</code></td>
-    <td><strong>运行时</strong><br>Node 18+</td>
-    <td><strong>当前入口</strong><br>npm CLI · MCP · Agent Skills · Agent guidance</td>
-  </tr>
-  <tr>
-    <td><strong>输出</strong><br>Markdown · JSON</td>
-    <td><strong>支持范围</strong><br>Next.js App Router · TypeScript</td>
-    <td><strong>闸门</strong><br><code>Launch Blocked</code></td>
-  </tr>
-  <tr>
-    <td><strong>当前命令</strong><br><code>inspect</code> · <code>init</code> · <code>benchmark</code> · <code>mcp</code></td>
-    <td><strong>计划入口</strong><br>Agent Skills · Plugin · CI</td>
-    <td><strong>使用场景</strong><br>上线前 · 交付前 · Agent 修复循环</td>
-  </tr>
+<tr>
+<td align="center" width="12.5%">
+<strong>Web App</strong><br>
+<sub>Next.js, React, Vue, Express, FastAPI, Django, Gin, Spring Boot</sub>
+</td>
+<td align="center" width="12.5%">
+<strong>CLI Tool</strong><br>
+<sub>Commander, Yargs, Oclif, Click, Cobra</sub>
+</td>
+<td align="center" width="12.5%">
+<strong>Library / SDK</strong><br>
+<sub>npm package, Python package, Go module</sub>
+</td>
+<td align="center" width="12.5%">
+<strong>Python API</strong><br>
+<sub>FastAPI, Flask, Django, Litestar</sub>
+</td>
+<td align="center" width="12.5%">
+<strong>Desktop App</strong><br>
+<sub>Electron, Tauri</sub>
+</td>
+<td align="center" width="12.5%">
+<strong>Mobile App</strong><br>
+<sub>React Native, Flutter, Capacitor</sub>
+</td>
+</tr>
+<tr>
+<td align="center" width="12.5%">
+<strong>Game</strong><br>
+<sub>Phaser, Pixi, Three.js, Godot, Unity</sub>
+</td>
+<td align="center" width="12.5%">
+<strong>ML Pipeline</strong><br>
+<sub>PyTorch, TensorFlow, Pandas, Scikit</sub>
+</td>
+<td align="center" width="12.5%">
+<strong>Agent / MCP</strong><br>
+<sub>LLM agents, tool use, MCP servers</sub>
+</td>
+<td align="center" width="12.5%">
+<strong>API Gateway</strong><br>
+<sub>Kong, Express Gateway, http-proxy</sub>
+</td>
+<td align="center" width="12.5%">
+<strong>Browser Extension</strong><br>
+<sub>Chrome, Firefox, Manifest V3</sub>
+</td>
+<td align="center" width="12.5%">
+<strong>IDE Plugin</strong><br>
+<sub>VS Code extensions</sub>
+</td>
+</tr>
+<tr>
+<td align="center" width="12.5%">
+<strong>CI/CD Pipeline</strong><br>
+<sub>GitHub Actions, GitLab CI, Jenkins</sub>
+</td>
+<td align="center" width="12.5%">
+<strong>Migration Tool</strong><br>
+<sub>Knex, Prisma, TypeORM, Alembic</sub>
+</td>
+<td align="center" width="12.5%">
+<strong>Cron Job</strong><br>
+<sub>node-cron, Celery, APScheduler</sub>
+</td>
+<td align="center" width="12.5%">
+<strong>Serverless</strong><br>
+<sub>AWS Lambda, Vercel, Cloudflare</sub>
+</td>
+<td align="center" width="12.5%">
+<strong>MQ Worker</strong><br>
+<sub>Kafka, RabbitMQ, BullMQ, SQS</sub>
+</td>
+<td align="center" width="12.5%">
+<strong>IaC</strong><br>
+<sub>Terraform, Pulumi, CDK, CloudFormation</sub>
+</td>
+</tr>
+<tr>
+<td align="center" width="12.5%">
+<strong>WASM Module</strong><br>
+<sub>wasm-pack, AssemblyScript</sub>
+</td>
+<td align="center" width="12.5%">
+<strong>Blockchain</strong><br>
+<sub>Solidity, ethers.js, web3.js</sub>
+</td>
+<td align="center" width="12.5%">
+<strong>IoT / Embedded</strong><br>
+<sub>PlatformIO, Johnny-Five, Arduino</sub>
+</td>
+<td align="center" width="12.5%">
+<strong>DevOps Script</strong><br>
+<sub>Shell scripts, zx, deployment automation</sub>
+</td>
+<td align="center" width="12.5%">
+<strong>Static Site</strong><br>
+<sub>Astro, Hugo, Gatsby, Eleventy</sub>
+</td>
+<td align="center" width="12.5%">
+<strong>CMS</strong><br>
+<sub>Strapi, Directus, Keystone, Payload</sub>
+</td>
+</tr>
+<tr>
+<td align="center" width="12.5%">
+<strong>Monitoring</strong><br>
+<sub>Prometheus, Grafana, StatsD, Datadog</sub>
+</td>
+<td align="center" width="12.5%">
+<strong>Payment System</strong><br>
+<sub>Stripe, PayPal, Square</sub>
+</td>
+<td align="center" width="12.5%">
+<strong>Auth Service</strong><br>
+<sub>Passport, NextAuth, Clerk, Auth.js</sub>
+</td>
+<td align="center" width="12.5%">
+</td>
+</tr>
 </table>
 
-## 你可以用它做什么
+<p align="center">
+  <sub>Each type gets 3-6 dedicated deep rules on top of the universal security and quality checks.</sub>
+</p>
 
-- 在交付、上线、部署前检查本地项目或公开 GitHub 仓库。
-- 找到真正会阻断上线的风险，而不是只拿一份笼统 checklist。
-- 看到每个问题对应的文件证据、生产后果和修复验收标准。
-- 输出 Markdown 给人看，输出 JSON 给 agent、脚本或 CI 继续处理。
-- 通过 `demokiller init` 把规则写进 Codex、Claude Code、Cursor、Gemini CLI 等 agent 的工作流。
+---
 
-## 为什么需要它
+## Languages
 
-现在很多开发者用 AI 可以很快做出“看起来完成”的项目：页面能打开，API 能返回，支付能回调，AI 能生成内容，数据库也能写入。
+Demo Killer analyzes **18 languages** with language-aware parsing.
 
-问题是：能跑不等于能上线。
+| Language | Detection | AST (tree-sitter) | Call Graph | Taint Analysis |
+|----------|-----------|-------------------|------------|----------------|
+| TypeScript | ✅ | ✅ | ✅ | ✅ |
+| JavaScript | ✅ | ✅ | ✅ | ✅ |
+| Python | ✅ | ✅ | ✅ (AST) | ✅ (BFS) |
+| Go | ✅ | ✅ | regex | taint sinks |
+| Rust | ✅ | ✅ | regex | taint sinks |
+| Java | ✅ | ✅ | regex | partial |
+| C# | ✅ | ✅ | regex | — |
+| PHP | ✅ | ✅ | — | — |
+| Ruby | ✅ | ✅ | — | — |
+| Swift | ✅ | ✅ | — | — |
+| Kotlin | ✅ | ✅ | — | — |
+| Scala | ✅ | ✅ | — | — |
+| Dart | ✅ | ✅ | — | — |
+| C / C++ | ✅ | ✅ | — | — |
+| Shell | ✅ | ✅ | — | — |
+| Lua | ✅ | ✅ | — | — |
+| Zig | ✅ | ✅ | — | — |
+| Vue | ✅ | ✅ | — | — |
 
-真实生产会遇到的不是 demo 场景：
+---
 
-- 公开 API 被脚本刷爆，烧掉 OpenAI/Claude/Stripe 等付费额度。
-- 管理接口缺少授权边界，用户数据被误删或越权修改。
-- Webhook 没验签、没幂等，支付状态被伪造或重复处理。
-- `.env.example` 不完整，部署时才发现关键变量缺失。
-- Prisma schema 有了，但没有 migration，生产数据库不可复现。
-- 关键 mutation 没日志，出事故时无法定位和恢复。
+## CLI commands
 
-Demo Killer 的目标不是替你“美化 demo”，而是把这些 demo 幻觉杀掉。
+| Command | Purpose |
+|---------|---------|
+| `demokiller inspect .` | Full production readiness audit |
+| `demokiller inspect . --format markdown` | Markdown output for PRs and docs |
+| `demokiller inspect . --format sarif` | SARIF for GitHub Code Scanning |
+| `demokiller inspect . --severity blocker` | Only show launch blockers |
+| `demokiller inspect . --save-baseline .dk.json` | Save current state as baseline |
+| `demokiller recheck .` | Diff against baseline (new findings only) |
+| `demokiller init .` | Scaffold agent integration files |
+| `demokiller benchmark benchmarks/list.json` | Run benchmark suite |
 
-## 快速开始
-
-不需要先全局安装：
-
-```powershell
-npx demokiller --help
-npx demokiller init .
-npx demokiller inspect . --markdown
-```
-
-如果你的 agent 支持 MCP（Claude Code、Cursor、Claude Desktop），可以直接配置 MCP server，参见 [MCP Server](#mcp-server) 章节。
-
-`init` 会把 Demo Killer 接入你的 agent 工作流：
-
-```text
-.demokiller/AGENT.md
-AGENTS.md
-```
-
-之后 Codex、Claude Code、Cursor、Gemini CLI 等 agent 进入项目时，就能知道：上线、发布、部署、交付前必须运行 Demo Killer，并把 `Launch Blocked` 当作阻断信号。
-
-## 一个典型输出
-
-```text
-Verdict: Launch Blocked
-
-DK-AI-001: Paid AI capability is exposed without production abuse controls
-Entry point: app/api/chat/route.ts
-Production consequence: A public script can repeatedly trigger paid AI calls and create unexpected API costs.
-
-Acceptance criteria:
-- Requests require an authenticated user or trusted server-side session.
-- Usage is bound to a user or tenant.
-- Per-user or per-IP quota exists.
-- Abnormal usage is logged.
-```
-
-Demo Killer 不会只说“这里可能有风险”。它会把风险拆成：
-
-```text
-入口 -> 能力 -> 资产 -> 缺失控制 -> 生产后果 -> 修复验收标准
-```
-
-这也是它和普通 linter、SAST、依赖漏洞扫描器的区别。
-
-## 命令
-
-| 命令 | 用途 |
-| --- | --- |
-| `npx demokiller init .` | 写入 agent 生产闸门说明 |
-| `npx demokiller inspect . --markdown` | 检查当前项目，输出人类可读报告 |
-| `npx demokiller inspect . --json` | 输出 agent/CI 可读 JSON |
-| `npx demokiller inspect https://github.com/owner/repo --markdown` | 检查公开 GitHub 仓库 |
-| `npx demokiller-mcp` | 启动 MCP server（供 Claude / Cursor 等客户端调用） |
-| `demokiller benchmark <manifest-path>` | 运行 benchmark manifest |
-
-也可以全局安装：
-
-```powershell
-npm install -g demokiller
-demokiller inspect . --markdown
-```
-
-## 当前覆盖
-
-Demo Killer 现在最适合检查这类项目：
-
-- **JavaScript/TypeScript**：Next.js、Express、Fastify
-- **Python**：FastAPI、Flask、Django
-- **Go**：Gin、Echo、Fiber
-- **Rust**：Actix、Axum、Rocket
-- **Java**：Spring Boot
-- **Kotlin**：Ktor
-- **Scala**：http4s、Akka
-- **C#**：ASP.NET
-- **PHP**：Laravel
-- **Ruby**：Rails、Sinatra
-- **Swift**：Vapor
-- **C/C++**、**Lua**、**Shell**、**Dart**、**Zig**：基础检测支持
-
-总共 **18 种语言、21 个框架**。
-- 本地目录，或可以公开访问的 GitHub 仓库。
-- 希望在交付前拿到一份可执行 hardening list 的团队和独立开发者。
-
-当前规则重点覆盖这些上线前高频风险：
-
-| 规则 | 检查内容 |
-| --- | --- |
-| **安全规则** | |
-| `DK-AI-001` | 公开 AI/付费能力是否缺少 auth、quota、rate limit |
-| `DK-AUTH-001` | 管理/数据 mutation 路由是否缺少认证和授权 |
-| `DK-WEBHOOK-001` | Stripe/payment webhook 是否缺少验签和幂等 |
-| `DK-INPUT-001` | API 路由是否直接消费请求 body 而无 schema 校验 |
-| `DK-ERR-001` | API 路由是否缺少错误处理，可能泄露内部信息 |
-| `DK-DATA-001` | 数据库查询结果是否可能未经字段过滤直接返回 |
-| `DK-CORS-001` | API 路由是否允许任意来源的跨域请求 |
-| `DK-SSRF-001` | HTTP 请求是否使用了可能由用户控制的 URL |
-| `DK-CMDI-001` | 路由是否执行系统命令，可能存在命令注入风险 |
-| `DK-SECRET-001` | 源码中是否包含硬编码的 API 密钥或令牌 |
-| `DK-SQLI-001` | SQL 查询是否使用字符串拼接而非参数化语句 |
-| `DK-PATH-001` | 文件系统操作是否使用了未经消毒的用户路径 |
-| `DK-INSEC-001` | 是否使用了不安全的反序列化或 eval |
-| `DK-HTTPS-001` | 是否未强制 HTTPS 或缺少 HSTS |
-| **Agent 生态规则** | |
-| `DK-AGENT-001` | LLM 输出是否直接传入 eval/exec（代码执行） |
-| `DK-AGENT-002` | MCP server tool 是否缺少认证 |
-| `DK-AGENT-003` | Agent tool 是否缺少调用频率限制 |
-| `DK-AGENT-004` | 用户输入是否直接拼入 prompt（注入风险） |
-| `DK-AGENT-005` | System prompt 或 memory 是否泄露给用户 |
-| **质量规则** | |
-| `DK-DEBUG-001` | 生产路由是否包含 console.log 等调试语句 |
-| `DK-CSP-001` | API 响应是否缺少 CSP、X-Frame-Options 等安全头 |
-| `DK-LOGI-001` | 用户输入是否可能直接写入日志（日志注入） |
-| `DK-DEP-001` | 依赖是否存在已知高危漏洞 |
-| `DK-DOCKER-001` | Dockerfile 是否有安全问题 |
-| `DK-ENV-001` | 生产环境变量是否有明确 env contract |
-| `DK-DB-001` | Prisma schema 是否缺少 migration 证据 |
-| `DK-OBS-001` | 关键 mutation 路径是否缺少诊断日志 |
-| `DK-TEST-001` | 项目是否缺少测试文件 |
-| `DK-TYPES-001` | TypeScript 是否启用了 strict 模式 |
-| `DK-README-001` | 项目是否缺少 README 或 LICENSE |
-| `DK-PUBLISH-001` | npm 包是否缺少 `files` 字段（可能泄露敏感文件） |
-
-如果证据不足，报告会直接给出 `Insufficient Evidence`，避免把不确定性包装成“可以上线”。
-
-## 如何理解结果
-
-Demo Killer 不会把任何项目直接标成 `Production Ready`。上线仍然需要真实部署、运行时验证、压测、安全审查、监控告警和人工判断。
-
-你只需要先看 verdict 和 Phase 0 findings：
-
-| Verdict | 意味着什么 | 下一步 |
-| --- | --- | --- |
-| `Launch Blocked` | 存在明确上线阻断项 | 暂停发布，先修阻断项 |
-| `Demo` | 有生产缺口，但不一定是最高级阻断 | 按 hardening plan 分阶段修 |
-| `Production Candidate` | 当前规则没有发现已知阻断 | 继续做部署验证、压测、安全审查和人工 review |
-| `Insufficient Evidence` | 证据不足，无法可靠判断 | 补充项目结构、换人工 review，或等待更多框架支持 |
-
-## 给 Agent 使用
-
-### 方式一：MCP（推荐）
-
-如果你的 agent 支持 MCP，直接配置 `demokiller-mcp`，agent 就能调用 `inspect_project`、`list_launch_blockers`、`generate_hardening_plan`。详见 [MCP Server](#mcp-server) 章节。
-
-### 方式二：CLI + Agent Guidance
-
-推荐把 Demo Killer 放进每次交付前的固定流程：
-
-```powershell
-npx demokiller init .
-npx demokiller inspect . --markdown
-```
-
-然后让 agent 按这个顺序工作：
-
-1. 先读 `Launch Blocked` 和 Phase 0 findings。
-2. 优先修复阻断项，再做 UI polish 或重构。
-3. 每修一轮重新运行 `demokiller inspect . --markdown`。
-4. 阻断项消失后，再进入部署验证、压测、安全审查和人工 review。
-
-Demo Killer 不替 agent 写业务代码。它给 agent 一个可执行、可复查、能阻断交付的生产就绪标准。
+---
 
 ## MCP Server
 
-Demo Killer 内置 MCP server，支持 Claude Code、Cursor、Claude Desktop 等 MCP 客户端直接调用。
+Demo Killer runs as an MCP server with 3 tools for agents:
 
-### 可用 Tools
+| Tool | What it does |
+|------|--------------|
+| `inspect_project` | Full audit with JSON or markdown output |
+| `list_launch_blockers` | Returns only blocker-severity findings |
+| `generate_hardening_plan` | 3-phase fix plan: blockers → hardening → improvements |
 
-| Tool | 用途 |
-| --- | --- |
-| `inspect_project` | 完整生产就绪检查，返回 verdict、findings、hardening plan |
-| `list_launch_blockers` | 仅返回 blocker 级别发现，快速判断 go/no-go |
-| `generate_hardening_plan` | 返回分阶段加固计划，指导修复顺序 |
+Start the server:
 
-### 配置示例
-
-**Claude Code** — 在 `.claude/settings.json` 或全局设置中添加：
-
-```json
-{
-  "mcpServers": {
-    "demokiller": {
-      "command": "npx",
-      "args": ["-y", "demokiller-mcp"]
-    }
-  }
-}
+```bash
+npx demokiller-mcp
 ```
 
-**Cursor** — 在 `.cursor/mcp.json` 中添加：
-
-```json
-{
-  "mcpServers": {
-    "demokiller": {
-      "command": "npx",
-      "args": ["-y", "demokiller-mcp"]
-    }
-  }
-}
-```
-
-**Claude Desktop** — 在 `claude_desktop_config.json` 中添加：
-
-```json
-{
-  "mcpServers": {
-    "demokiller": {
-      "command": "npx",
-      "args": ["-y", "demokiller-mcp"]
-    }
-  }
-}
-```
-
-也可以全局安装后直接指向可执行文件：
-
-```powershell
-npm install -g demokiller
-```
-
-```json
-{
-  "mcpServers": {
-    "demokiller": {
-      "command": "demokiller-mcp"
-    }
-  }
-}
-```
+---
 
 ## Agent Skill
 
-`demokiller init .` 会自动写入 `.claude/skills/demokiller/SKILL.md`，遵循 [Agent Skills](https://agentskills.io) 开放标准。Claude Code、Cursor、Copilot、Gemini CLI 等支持此标准的 agent 会自动识别。
+After `demokiller init .`, agents with skill support get:
 
-使用方式：
+- **`/demokiller` command** — run inspection, parse verdict, generate fix plan
+- **Auto-trigger** — skill activates on production-readiness context
+- **Blocker prioritization** — agent focuses on blockers first, then high, then medium
 
-- **手动触发**：在 Claude Code 中输入 `/demokiller`，agent 会运行检查并按 phase 顺序修复。
-- **自动触发**：当对话涉及上线、部署、发布、go live 等场景时，agent 会自动加载此 skill 并执行检查。
-- **MCP 联动**：如果已配置 `demokiller-mcp`，agent 可以通过 MCP tools 直接调用，无需 CLI。
+---
 
-Skill 文件是幂等的——重复运行 `demokiller init .` 不会覆盖已有的自定义 skill。
+## vs. other tools
 
-## 开发与贡献
+| | CodeQL | SonarQube | Semgrep | Snyk | **Demo Killer** |
+|---|---|---|---|---|---|
+| **Purpose** | Find vulns | Find code smells | Find patterns | Find dep vulns | **Find launch blockers** |
+| **Output** | "47 medium issues" | "D-rating" | "12 findings" | "3 high vulns" | **"Launch Blocked"** |
+| **Project types** | Generic | Generic | Generic | Generic | **26 types, type-specific rules** |
+| **Agent-native** | ❌ | ❌ | ❌ | ❌ | **✅ MCP, Skills, JSON, SARIF** |
+| **Verdict** | No | Score | No | No | **4-level verdict** |
+| **Consequence** | No | No | No | No | **"Here's what happens if you ignore this"** |
+| **Acceptance criteria** | No | No | No | No | **"Here's what 'fixed' looks like"** |
 
-想贡献规则、接入方式或 benchmark 样本，可以先跑本地检查：
+CodeQL tells you what's wrong with your code. **Demo Killer tells you whether your project can go live.**
 
-```powershell
-git clone https://github.com/AVIDS2/demokiller.git
-cd demokiller
-npm install
-npm test
-npm run typecheck
-npm run build
-```
-
-项目也内置了公开 GitHub 样本 benchmark，用来检查规则是否还能覆盖不同项目形态：
-
-```powershell
-npm run benchmark
-```
-
-发布前推荐检查：
-
-```powershell
-npm test
-npm run typecheck
-npm run build
-npm audit --json
-npm pack --dry-run
-```
-
-## 如何加规则
-
-加一条规则只需要 3 步：
-
-**1. 在 `src/source-inspector.ts` 添加检测信号**
-
-如果是文本可检测的模式（正则/string 匹配），加到 `detectCapabilitiesFromText()` 或 `detectControlsFromText()`。如果是 AST 才能检测的模式，加到 `detectFromJsTsAst()`。
-
-**2. 在 `src/rules/` 创建规则文件**
-
-参考现有规则（如 `src/rules/input-validation.ts`），实现一个接收 `RouteSourceEvidence` 并返回 `Finding[]` 的函数。
-
-**3. 在 `src/rules/index.ts` 注册规则**
-
-导入新规则函数，在 `analyzeFindings` 的返回数组中加入 `...routeEvidence.flatMap(yourNewRule)`。
-
-更新 `fixtures/expected/*.findings.json` golden files 和 `README.md` 规则表后，跑 `npm test` 验证。
+---
 
 ## Roadmap
 
-- Plugin 入口，让非 MCP / 非 Skill 的agent 也能原生接入。
-- 更多生产风险域和 benchmark 样本。
-- Java/C#/PHP/Ruby call graph 支持。
-- 系统化 false-positive 测量。
+- Systematic false-positive measurement on 100+ real-world projects
+- Per-file analysis replacing content concatenation (reduces cross-file false positives)
+- Java, C#, PHP, Ruby call graph support (currently regex-only)
+- Plugin API for custom rules
+- VS Code extension
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, adding rules, and testing.
+
+---
 
 ## License
 
-MIT
+[MIT](LICENSE) — use it however you want.
+
+<p align="center">
+  <sub>Built for developers who ship, not developers who demo.</sub>
+</p>
