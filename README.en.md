@@ -345,6 +345,11 @@ Demo Killer detects **26 project types**, each with dedicated deep rules.
 <strong>Auth Service</strong><br>
 <sub>Passport, NextAuth, Clerk, Auth.js</sub>
 </td>
+<td align="center" width="12.5%">
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/c/c-original.svg" width="36" height="36"><br>
+<strong>Systems C/C++</strong><br>
+<sub>Kernel, Drivers, Native Apps, Embedded Firmware</sub>
+</td>
 </tr>
 </table>
 

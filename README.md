@@ -345,6 +345,11 @@ Demo Killer 检测 **26 种项目类型**，每种都有专属深度规则。
 <strong>认证服务</strong><br>
 <sub>Passport, NextAuth, Clerk, Auth.js</sub>
 </td>
+<td align="center" width="12.5%">
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/c/c-original.svg" width="36" height="36"><br>
+<strong>系统级 C/C++</strong><br>
+<sub>内核, 驱动, 原生应用, 嵌入式固件</sub>
+</td>
 </tr>
 </table>
 
