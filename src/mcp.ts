@@ -2,12 +2,16 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
+import { readFileSync } from "node:fs";
 import { resolveRepository } from "./repository.js";
 import { analyzeFindings } from "./rules/index.js";
 import { buildJsonReport } from "./report/json.js";
 import { renderMarkdownReport } from "./report/markdown.js";
 import { SUPPORTED_STACKS } from "./shared-constants.js";
 import type { AnalysisReport } from "./types.js";
+
+const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+const VERSION: string = pkg.version;
 
 export async function runInspection(projectPath: string): Promise<AnalysisReport> {
   const resolved = await resolveRepository(projectPath);
@@ -76,7 +80,7 @@ export async function handleGenerateHardeningPlan(projectPath: string): Promise<
 export function createMcpServer(): McpServer {
   const server = new McpServer({
     name: "demokiller",
-    version: "0.7.6",
+    version: VERSION,
   });
 
   server.tool(

@@ -191,13 +191,28 @@ async function walkSourceFiles(root: string, dir = root): Promise<string[]> {
 
 function buildFileIndex(files: string[]): Map<string, string> {
   const index = new Map<string, string>();
+  // Track basenames to detect conflicts — don't overwrite if ambiguous
+  const basenameCount = new Map<string, number>();
+
   for (const file of files) {
     const ext = path.extname(file);
     const base = path.basename(file, ext);
-    index.set(base, file);
-    // Also index by directory path without extension
+    basenameCount.set(base, (basenameCount.get(base) ?? 0) + 1);
+  }
+
+  for (const file of files) {
+    const ext = path.extname(file);
+    const base = path.basename(file, ext);
     const noExt = file.replace(/\.[^.]+$/, "");
+
+    // Always index by full path without extension
     index.set(noExt, file);
+
+    // Only index by basename if unique (no conflict)
+    if ((basenameCount.get(base) ?? 0) === 1) {
+      index.set(base, file);
+    }
+
     // Index "index" files
     if (base === "index") {
       const dir = path.dirname(file);

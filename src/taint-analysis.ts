@@ -445,6 +445,7 @@ function findCrossFunctionTaint(graph: CallGraph, maxDepth = 3): TaintPath[] {
 
     // BFS: each entry is (current function key, hop count, path of keys, path of call sites)
     const queue: { funcKey: string; depth: number; path: string[]; callSites: CallSite[] }[] = [];
+    let qIdx = 0;
     const visitedInBfs = new Set<string>();
 
     // Start with direct callees of the source function
@@ -458,8 +459,8 @@ function findCrossFunctionTaint(graph: CallGraph, maxDepth = 3): TaintPath[] {
       });
     }
 
-    while (queue.length > 0) {
-      const current = queue.shift()!;
+    while (qIdx < queue.length) {
+      const current = queue[qIdx++];
       if (current.depth > maxDepth) continue;
 
       const bfsKey = current.funcKey + ":" + current.depth;

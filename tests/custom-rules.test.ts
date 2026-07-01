@@ -26,10 +26,19 @@ describe("custom rules plugin system", () => {
     }];
     fs.writeFileSync(path.join(pluginDir, "no-todo.json"), JSON.stringify(rule));
 
-    const { findings } = await analyzeFindings(FIXTURE);
-    // May or may not have TODO findings depending on fixture content
-    // Just verify it doesn't crash
-    expect(findings).toBeDefined();
+    // Write a fixture file with a TODO comment
+    const todoFile = path.join(FIXTURE, "app", "_dk_test_todo.ts");
+    fs.writeFileSync(todoFile, `// TODO: fix this later\nexport const x = 1;\n`);
+
+    try {
+      const { findings } = await analyzeFindings(FIXTURE);
+      const customFindings = findings.filter(f => f.ruleId === "CUSTOM-001");
+      expect(customFindings.length).toBeGreaterThan(0);
+      expect(customFindings[0].title).toBe("No TODO comments in production");
+      expect(customFindings[0].severity).toBe("medium");
+    } finally {
+      fs.unlinkSync(todoFile);
+    }
   });
 
   it("ignores malformed plugin files", async () => {
@@ -37,10 +46,10 @@ describe("custom rules plugin system", () => {
 
     const { findings } = await analyzeFindings(FIXTURE);
     expect(findings).toBeDefined();
+    expect(findings.every(f => f.ruleId !== "CUSTOM-001")).toBe(true);
   });
 
   it("returns no custom findings when plugin dir doesn't exist", async () => {
-    // Remove plugin dir
     fs.rmSync(pluginDir, { recursive: true, force: true });
 
     const { findings } = await analyzeFindings(FIXTURE);
